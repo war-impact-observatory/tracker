@@ -1,0 +1,39 @@
+FOR IMMEDIATE USE — War Impact Observatory
+Updated: April 5, 2026 | Source: warimpactobservatory.org (CC BY 4.0)
+
+HEADLINE: Iran Conflict Drives Largest Oil Supply Disruption in History;
+G20 Households Face $480–$2,800 in Annual Extra Costs
+
+KEY FIGURES:
+• Brent crude: $113/barrel (+55% since Feb 27)
+• Strait of Hormuz transits: down 95% (130 → 6 ships/day)
+• Global oil supply loss: 10+ million barrels/day (largest ever, per IEA)
+• US gasoline: $4.00/gallon (+30%)
+• Global inflation forecast: 4.0% (OECD), up from 3.2% pre-conflict
+• Most vulnerable: Turkey (+3.2pp inflation), India (+2.1pp), S. Korea (+2.0pp)
+
+HOUSEHOLD IMPACT (estimated additional annual cost):
+• Germany: $2,800 | US: $2,400 | Italy: $2,300 | UK: $2,200
+• Japan: $2,100 | Australia: $1,900 | South Korea: $1,600
+• India: $480 | Turkey: $380 | Brazil: $350 | Indonesia: $210
+
+SECOND-ORDER EFFECTS:
+• 30% of global fertilizer exports disrupted → food price acceleration
+• ECB warns of stagflation; Germany & Italy face technical recession risk
+• Emerging market currencies weakening (TRY -6.2%, INR -4.3%, ZAR -4.1%)
+• China restricted fertilizer exports to protect domestic food supply
+• Global trade growth forecast halved: 4.7% → 1.5–2.5%
+
+METHODOLOGY: Modular, open-source framework using IMF, World Bank, EIA,
+UNCTAD, and Oxford Economics data. Household costs derived from IMF
+oil-price pass-through coefficients. All data and code available on GitHub
+under CC BY 4.0 license.
+
+CONTACT: warimpactobservatory@protonmail.com
+GITHUB: github.com/war-impact-observatory/tracker
+DASHBOARD: warimpactobservatory.org
+LICENSE: Creative Commons Attribution 4.0 International
+
+---
+Attribution requirement: "Source: War Impact Observatory (warimpactobservatory.org)"
+No permission needed for reproduction with attribution.

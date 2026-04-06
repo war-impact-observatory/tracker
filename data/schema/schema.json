@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "War Impact Observatory Data Schema",
+  "description": "Schema definitions for all datasets used in the War Impact Observatory",
+  "version": "1.0.0",
+  "datasets": {
+    "oil_prices": {
+      "description": "Daily Brent and WTI crude oil spot prices",
+      "frequency": "daily",
+      "source": "EIA Open Data API",
+      "fields": {
+        "date": { "type": "string", "format": "date", "description": "ISO 8601 date" },
+        "brent": { "type": "number", "description": "Brent crude spot price USD/barrel" },
+        "wti": { "type": "number", "description": "WTI crude spot price USD/barrel" },
+        "event": { "type": "string", "nullable": true, "description": "Notable event annotation" }
+      }
+    },
+    "household_costs": {
+      "description": "Estimated additional annual household costs by country",
+      "frequency": "daily (recomputed)",
+      "source": "Modeled from IMF pass-through coefficients",
+      "fields": {
+        "country": { "type": "string", "description": "Country name (G20)" },
+        "household_cost_usd": { "type": "number", "description": "Additional annual cost in USD" },
+        "brent_price": { "type": "number", "description": "Brent price used for computation" },
+        "oil_import_pct": { "type": "number", "description": "Oil import dependency (0-1)" },
+        "pass_through": { "type": "number", "description": "Price pass-through coefficient (0-1)" },
+        "subsidy_offset": { "type": "number", "description": "Government subsidy absorption (0-1)" },
+        "computed_at": { "type": "string", "format": "date-time", "description": "Computation timestamp" }
+      }
+    },
+    "inflation_by_country": {
+      "description": "Monthly CPI year-over-year by country/region",
+      "frequency": "monthly",
+      "source": "IMF WEO, OECD, national statistics agencies",
+      "fields": {
+        "month": { "type": "string", "description": "Month label (e.g., 'Mar 26')" },
+        "country": { "type": "string", "description": "Country or region name" },
+        "cpi_yoy": { "type": "number", "description": "CPI year-over-year percentage" },
+        "is_forecast": { "type": "boolean", "description": "Whether this is a forecast vs. observed" }
+      }
+    },
+    "trade_disruption": {
+      "description": "Key trade and supply chain metrics",
+      "frequency": "weekly",
+      "source": "UNCTAD, Lloyd's List, WTO",
+      "fields": {
+        "metric": { "type": "string", "description": "Name of the metric" },
+        "pre_conflict": { "type": "string", "description": "Value before Feb 28, 2026" },
+        "current": { "type": "string", "description": "Most recent value" },
+        "change": { "type": "string", "description": "Magnitude and direction of change" },
+        "source": { "type": "string", "description": "Specific data source" }
+      }
+    },
+    "country_impact": {
+      "description": "Comprehensive country-level impact matrix",
+      "frequency": "weekly",
+      "source": "Multiple (see methodology)",
+      "fields": {
+        "country": { "type": "string" },
+        "flag": { "type": "string", "description": "Country flag emoji" },
+        "oil_dependency": { "type": "number", "description": "Oil import dependency score (0-100)" },
+        "inflation_impact_pp": { "type": "number", "description": "Additional inflation in percentage points" },
+        "gdp_impact_pct": { "type": "number", "description": "GDP growth impact in percentage points" },
+        "household_cost_usd": { "type": "number", "description": "Additional annual household cost USD" },
+        "fuel_price_increase_pct": { "type": "number", "description": "Fuel price increase %" },
+        "food_price_increase_pct": { "type": "number", "description": "Food price increase %" },
+        "severity": { "type": "string", "enum": ["critical", "high", "moderate", "low"] },
+        "currency_change_pct": { "type": "number", "description": "Currency change vs USD since Feb 27" }
+      }
+    }
+  }
+}

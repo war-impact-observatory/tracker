@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>War Impact Observatory — Global Economic Impact Tracker</title>
+<meta name="description" content="Open-source tracker measuring the economic impact of the 2026 US-Israel-Iran war on major economies and their citizens worldwide.">
+<meta property="og:title" content="War Impact Observatory">
+<meta property="og:description" content="Real-time economic impact of the 2026 Iran conflict on major economies and households worldwide.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary:#0a0a0f; --bg-secondary:#12121a; --bg-card:#1a1a2e;
+  --bg-card-hover:#222240; --border:#2a2a4a; --text-primary:#e8e8f0;
+  --text-secondary:#8888aa; --text-muted:#555570;
+  --red:#ff4757; --red-dim:#ff475730; --orange:#ff8c42; --orange-dim:#ff8c4230;
+  --yellow:#ffd166; --yellow-dim:#ffd16630; --green:#06d6a0; --green-dim:#06d6a030;
+  --blue:#4ea8de; --blue-dim:#4ea8de30; --purple:#9b5de5; --purple-dim:#9b5de530;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:var(--bg-primary);color:var(--text-primary);line-height:1.6;-webkit-font-smoothing:antialiased}
+.container{max-width:1400px;margin:0 auto;padding:0 24px}
+.hero{padding:60px 0 40px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#0f0f1a,var(--bg-primary))}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:var(--red-dim);border:1px solid var(--red);border-radius:20px;padding:4px 14px;font-size:12px;color:var(--red);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:20px}
+.pulse{width:8px;height:8px;background:var(--red);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-size:48px;font-weight:900;letter-spacing:-1.5px;line-height:1.1;margin-bottom:16px;background:linear-gradient(135deg,#fff,#aaa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:18px;color:var(--text-secondary);max-width:700px;line-height:1.7;margin-bottom:24px}
+.hero-meta{display:flex;gap:24px;flex-wrap:wrap;font-size:13px;color:var(--text-muted)}
+.hero-meta span{display:flex;align-items:center;gap:6px}
+.nav-tabs{display:flex;gap:4px;padding:20px 0;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.nav-tabs::-webkit-scrollbar{display:none}
+.nav-tab{padding:10px 20px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;color:var(--text-secondary);border:1px solid transparent;transition:all .2s;white-space:nowrap;background:none;font-family:inherit}
+.nav-tab:hover{color:var(--text-primary);background:var(--bg-card)}
+.nav-tab.active{color:var(--text-primary);background:var(--bg-card);border-color:var(--border)}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;padding:24px 0}
+.kpi{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px;transition:all .2s}
+.kpi:hover{background:var(--bg-card-hover);transform:translateY(-2px)}
+.kpi-label{font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:8px}
+.kpi-val{font-size:32px;font-weight:800;letter-spacing:-1px;font-family:'JetBrains Mono',monospace;color:var(--red)}
+.kpi-chg{font-size:13px;margin-top:6px;font-weight:500;color:var(--red)}
+.kpi-src{font-size:11px;color:var(--text-muted);margin-top:8px}
+.section{padding:32px 0;display:none}
+.section.active{display:block}
+.section-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.section-title{font-size:22px;font-weight:700;letter-spacing:-.5px}
+.section-sub{font-size:14px;color:var(--text-secondary);margin-top:4px}
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px}
+.card-title{font-size:16px;font-weight:600;margin-bottom:4px}
+.card-sub{font-size:13px;color:var(--text-secondary);margin-bottom:20px}
+.chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(500px,1fr));gap:20px}
+.chart-wrap{position:relative;width:100%;height:380px}
+.chart-wrap-sm{height:340px}
+table{width:100%;border-collapse:collapse}
+.tbl-wrap{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+th{text-align:left;padding:14px 16px;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-muted);font-weight:600;border-bottom:1px solid var(--border);background:var(--bg-secondary);cursor:pointer}
+td{padding:12px 16px;font-size:14px;border-bottom:1px solid #1e1e35}
+tr:hover td{background:var(--bg-card-hover)}
+.flag{font-size:20px;margin-right:8px}
+.mono{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500}
+.sev{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;text-transform:uppercase}
+.sev-critical{background:var(--red-dim);color:var(--red)}
+.sev-high{background:var(--orange-dim);color:var(--orange)}
+.sev-moderate{background:var(--yellow-dim);color:var(--yellow)}
+.sev-low{background:var(--green-dim);color:var(--green)}
+.bar-cell{display:flex;align-items:center;gap:8px}
+.bar{height:6px;border-radius:3px;min-width:4px}
+.ch-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.ch-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:24px;transition:all .2s}
+.ch-card:hover{border-color:var(--text-muted)}
+.ch-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:14px}
+.ch-card h3{font-size:16px;font-weight:600;margin-bottom:8px}
+.ch-card p{font-size:13px;color:var(--text-secondary);line-height:1.6}
+.ch-metric{margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.ch-metric-lbl{font-size:12px;color:var(--text-muted)}
+.ch-metric-val{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:18px}
+.method-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:20px}
+.method-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:24px}
+.method-card h3{font-size:15px;font-weight:600;margin-bottom:12px;color:var(--blue)}
+.method-card p{font-size:13px;color:var(--text-secondary);line-height:1.7}
+.method-card ul{list-style:none;margin-top:12px}
+.method-card li{font-size:13px;color:var(--text-secondary);padding:4px 0 4px 16px;position:relative}
+.method-card li::before{content:'→';position:absolute;left:0;color:var(--blue)}
+.warn{margin-top:12px;padding:10px 12px;background:var(--bg-secondary);border-radius:6px;font-size:12px;color:var(--yellow);line-height:1.6}
+.snippet pre{background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;padding:20px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text-secondary);line-height:1.7;white-space:pre-wrap;word-break:break-word}
+.footer{padding:40px 0;border-top:1px solid var(--border);margin-top:40px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px}
+.footer h4{font-size:14px;font-weight:600;margin-bottom:12px}
+.footer p,.footer a{font-size:13px;color:var(--text-secondary);text-decoration:none;line-height:1.8}
+.footer a:hover{color:var(--text-primary)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;border:none;text-decoration:none}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:#3d8ec5}
+.btn-outline{background:transparent;color:var(--text-primary);border:1px solid var(--border)}
+.btn-outline:hover{border-color:var(--text-muted)}
+.tbl-scroll{overflow-x:auto}
+/* Language Bar */
+.lang-bar{background:var(--bg-secondary);border-bottom:1px solid var(--border);padding:8px 0;position:sticky;top:0;z-index:100}
+.lang-inner{display:flex;align-items:center;gap:10px;overflow-x:auto;scrollbar-width:none}
+.lang-inner::-webkit-scrollbar{display:none}
+.lang-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600;white-space:nowrap}
+.lang-btn{padding:4px 10px;border-radius:6px;border:1px solid transparent;background:none;color:var(--text-secondary);font-size:12px;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:5px}
+.lang-btn:hover{color:var(--text-primary);background:var(--bg-card)}
+.lang-btn.active{color:var(--text-primary);background:var(--bg-card);border-color:var(--border)}
+.lang-btn .lang-flag{font-size:14px}
+@media(max-width:768px){
+  .footer-grid{grid-template-columns:1fr}
+  h1{font-size:32px}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .chart-grid{grid-template-columns:1fr}
+  .chart-wrap,.chart-wrap-sm{height:280px}
+}
+</style>
+</head>
+<body>
+
+<!-- LANGUAGE BAR -->
+<div class="lang-bar">
+  <div class="container">
+    <div class="lang-inner">
+      <span class="lang-label" data-i18n="lang_label">Language:</span>
+      <div id="langButtons"></div>
+    </div>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="container">
+    <div class="hero-badge"><div class="pulse"></div> Live Tracker</div>
+    <h1>War Impact Observatory</h1>
+    <p class="hero-sub">Open-source economic impact tracker for the 2026 US-Israel-Iran conflict. Measuring the cost to major economies and their citizens worldwide — oil prices, inflation, trade disruption, household costs, and second-order effects. Updated daily.</p>
+    <div class="hero-meta">
+      <span>&#128197; Last updated: April 5, 2026</span>
+      <span>&#9201; Day 36 of conflict</span>
+      <span>&#127758; 29 economies tracked</span>
+      <span>&#128202; 6 impact channels</span>
+    </div>
+    <div style="margin-top:20px;display:flex;gap:12px">
+      <a href="https://github.com/war-impact-observatory/tracker" class="btn btn-primary">&#11088; Star on GitHub</a>
+      <a href="#" class="btn btn-outline" onclick="switchTab('media');return false">&#128240; Media Kit</a>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="container">
+  <div class="nav-tabs" id="navTabs">
+    <button class="nav-tab active" data-tab="dashboard">Dashboard</button>
+    <button class="nav-tab" data-tab="countries">Country Impact</button>
+    <button class="nav-tab" data-tab="channels">Impact Channels</button>
+    <button class="nav-tab" data-tab="methodology">Methodology &amp; Critique</button>
+    <button class="nav-tab" data-tab="media">Media Kit</button>
+    <button class="nav-tab" data-tab="pipeline">Daily Pipeline</button>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ========== DASHBOARD TAB ========== -->
+<div class="section active" id="tab-dashboard">
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Brent Crude</div><div class="kpi-val">$113</div><div class="kpi-chg">+55% since Feb 27</div><div class="kpi-src">vs. $73 pre-conflict</div></div>
+    <div class="kpi"><div class="kpi-label">US Gas Price</div><div class="kpi-val">$4.00</div><div class="kpi-chg">+30% per gallon</div><div class="kpi-src">As of Mar 31</div></div>
+    <div class="kpi"><div class="kpi-label">Global Inflation</div><div class="kpi-val">4.0%</div><div class="kpi-chg">+0.8pp from baseline</div><div class="kpi-src">OECD forecast</div></div>
+    <div class="kpi"><div class="kpi-label">Hormuz Transits</div><div class="kpi-val">6/day</div><div class="kpi-chg">-95% collapse</div><div class="kpi-src">vs. 130/day pre-conflict</div></div>
+    <div class="kpi"><div class="kpi-label">Supply Disrupted</div><div class="kpi-val">10M bpd</div><div class="kpi-chg">Largest ever (IEA)</div><div class="kpi-src">As of Mar 12</div></div>
+    <div class="kpi"><div class="kpi-label">Days of Conflict</div><div class="kpi-val">36</div><div class="kpi-chg">Since Feb 28, 2026</div><div class="kpi-src">Ongoing</div></div>
+  </div>
+
+  <!-- Oil Price Chart -->
+  <div class="card">
+    <div class="card-title">Oil Price Timeline</div>
+    <div class="card-sub">Brent Crude &amp; WTI spot prices (USD/barrel) — Feb 27 to Apr 5, 2026</div>
+    <div class="chart-wrap"><canvas id="oilChart"></canvas></div>
+  </div>
+
+  <div class="chart-grid">
+    <!-- Inflation Chart -->
+    <div class="card">
+      <div class="card-title">Inflation Trajectory by Region</div>
+      <div class="card-sub">Year-over-year CPI (%) — asterisk (*) = forecast</div>
+      <div class="chart-wrap chart-wrap-sm"><canvas id="inflChart"></canvas></div>
+    </div>
+    <!-- Household Cost Chart -->
+    <div class="card">
+      <div class="card-title">Additional Annual Household Cost</div>
+      <div class="card-sub">USD per household per year — modeled from IMF pass-through coefficients</div>
+      <div class="chart-wrap chart-wrap-sm"><canvas id="hhChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Trade Disruption Table -->
+  <div style="margin-top:12px">
+    <div class="section-hdr"><div><div class="section-title">Trade &amp; Supply Chain Disruption</div><div class="section-sub">Before vs. after the Strait of Hormuz closure</div></div></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Metric</th><th>Pre-Conflict</th><th>Current</th><th>Change</th></tr></thead>
+        <tbody>
+          <tr><td style="font-weight:500">Hormuz daily transits</td><td class="mono" style="color:var(--text-secondary)">~130</td><td class="mono" style="font-weight:600">~6</td><td class="mono" style="color:var(--red);font-weight:600">-95%</td></tr>
+          <tr><td style="font-weight:500">Global oil supply disrupted</td><td class="mono" style="color:var(--text-secondary)">0 M bpd</td><td class="mono" style="font-weight:600">10+ M bpd</td><td class="mono" style="color:var(--red);font-weight:600">+10M bpd</td></tr>
+          <tr><td style="font-weight:500">LNG supply (Qatar force majeure)</td><td class="mono" style="color:var(--text-secondary)">20% global</td><td class="mono" style="font-weight:600">Halted</td><td class="mono" style="color:var(--red);font-weight:600">-100%</td></tr>
+          <tr><td style="font-weight:500">Global trade growth forecast</td><td class="mono" style="color:var(--text-secondary)">4.7%</td><td class="mono" style="font-weight:600">1.5-2.5%</td><td class="mono" style="color:var(--red);font-weight:600">-2.2pp</td></tr>
+          <tr><td style="font-weight:500">Global GDP growth forecast</td><td class="mono" style="color:var(--text-secondary)">2.9%</td><td class="mono" style="font-weight:600">2.6%</td><td class="mono" style="color:var(--red);font-weight:600">-0.3pp</td></tr>
+          <tr><td style="font-weight:500">Fertilizer transit (Hormuz)</td><td class="mono" style="color:var(--text-secondary)">30% global</td><td class="mono" style="font-weight:600">Disrupted</td><td class="mono" style="color:var(--red);font-weight:600">Severe</td></tr>
+          <tr><td style="font-weight:500">Shipping insurance premiums</td><td class="mono" style="color:var(--text-secondary)">Baseline</td><td class="mono" style="font-weight:600">+400%</td><td class="mono" style="color:var(--red);font-weight:600">+400%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ========== COUNTRY IMPACT TAB ========== -->
+<div class="section" id="tab-countries">
+  <div class="section-hdr"><div><div class="section-title">Global Conflict Impact Matrix</div><div class="section-sub">Covers conflict participants and major affected economies worldwide. Click any column header to sort.</div></div></div>
+  <div class="tbl-scroll"><div class="tbl-wrap"><table id="countryTable">
+    <thead><tr>
+      <th data-sort="country" data-i18n="th_country">Country</th>
+      <th data-sort="severity" data-i18n="th_severity">Severity</th>
+      <th data-sort="inflImpact" data-i18n="th_inflation">Inflation Impact</th>
+      <th data-sort="gdpHit" data-i18n="th_gdp">GDP Impact</th>
+      <th data-sort="householdCost" data-i18n="th_household">Household Cost/yr</th>
+      <th data-sort="ppErosion" data-i18n="th_pperosion">Buying Power Loss</th>
+      <th data-sort="ffShift" data-i18n="th_ffshift">Budget Squeeze</th>
+      <th data-sort="fuelUp" data-i18n="th_fuel">Fuel Price &#8593;</th>
+      <th data-sort="foodUp" data-i18n="th_food">Food Price &#8593;</th>
+      <th data-sort="currencyChg" data-i18n="th_currency">Currency</th>
+    </tr></thead>
+    <tbody id="countryBody"></tbody>
+  </table></div></div>
+</div>
+
+<!-- ========== IMPACT CHANNELS TAB ========== -->
+<div class="section" id="tab-channels">
+  <div class="section-hdr"><div><div class="section-title">Six Channels of Economic Impact</div><div class="section-sub">How the conflict transmits economic damage across borders</div></div></div>
+  <div class="ch-grid" id="channelGrid"></div>
+</div>
+
+<!-- ========== METHODOLOGY TAB ========== -->
+<div class="section" id="tab-methodology">
+  <div class="section-hdr"><div><div class="section-title">Methodology &amp; Critical Evaluation</div><div class="section-sub">Transparent assessment of data sources, representation choices, and known limitations</div></div></div>
+  <div class="method-grid" id="methodGrid"></div>
+</div>
+
+<!-- ========== MEDIA KIT TAB ========== -->
+<div class="section" id="tab-media">
+  <div class="section-hdr"><div><div class="section-title">Media Kit &amp; Newsroom Content</div><div class="section-sub">Ready-to-use content for journalists, editors, and social media. All CC BY 4.0.</div></div></div>
+  <div class="card snippet" style="margin-bottom:20px">
+    <div class="card-title">Newsroom Wire Snippet</div>
+    <div class="card-sub">Copy-paste ready for editors and wire services. CC BY 4.0 — attribution required, no permission needed.</div>
+    <pre id="pressSnippet"></pre>
+  </div>
+  <div class="card snippet">
+    <div class="card-title">Twitter/X Thread Template</div>
+    <div class="card-sub">Ready-to-post thread with key data points.</div>
+    <pre id="twitterThread"></pre>
+  </div>
+</div>
+
+<!-- ========== PIPELINE TAB ========== -->
+<div class="section" id="tab-pipeline">
+  <div class="section-hdr"><div><div class="section-title">Automated Daily Update Pipeline</div><div class="section-sub">GitHub Actions CI/CD + free public APIs = fully automated daily tracker</div></div></div>
+  <div class="method-grid" id="pipelineGrid"></div>
+</div>
+
+
+</div><!-- /container -->
+
+<!-- ADD COUNTRY MODAL -->
+<div id="addCountryModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:480px;width:90%">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h3 style="font-size:20px;font-weight:700">Request a Country</h3>
+      <button onclick="document.getElementById('addCountryModal').style.display='none'" style="background:none;border:none;color:var(--text-secondary);font-size:24px;cursor:pointer;padding:4px">&times;</button>
+    </div>
+    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:20px;line-height:1.6">We currently track G20 members plus conflict-adjacent countries. Submit a country to be added to the observatory. This creates a public GitHub Issue that maintainers and the community can review and discuss.</p>
+    <form id="addCountryForm" onsubmit="submitCountry(event)">
+      <label style="font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600;display:block;margin-bottom:6px">Country Name</label>
+      <input id="countryInput" type="text" required placeholder="e.g. Pakistan, Egypt, Jordan..." style="width:100%;padding:12px 16px;border-radius:8px;border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-size:14px;font-family:inherit;margin-bottom:16px;outline:none">
+      <label style="font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600;display:block;margin-bottom:6px">Why should this country be included? (optional)</label>
+      <textarea id="countryReason" rows="3" placeholder="e.g. Major oil importer, directly affected by Hormuz closure..." style="width:100%;padding:12px 16px;border-radius:8px;border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-primary);font-size:14px;font-family:inherit;margin-bottom:20px;outline:none;resize:vertical"></textarea>
+      <div style="display:flex;gap:12px">
+        <button type="submit" class="btn btn-primary" style="flex:1">Submit via GitHub</button>
+        <button type="button" class="btn btn-outline" onclick="document.getElementById('addCountryModal').style.display='none'">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <h4>War Impact Observatory</h4>
+        <p>An open-source project measuring the global economic spillover costs of armed conflict. Built with transparency, rigor, and accessibility in mind. All data and methodology are open for inspection, contribution, and critique.</p>
+        <p style="margin-top:12px">Data license: CC BY 4.0 | Code license: MIT</p>
+      </div>
+      <div>
+        <h4>Data Sources</h4>
+        <p><a href="https://www.eia.gov/opendata/">EIA Open Data</a></p>
+        <p><a href="https://data.imf.org/">IMF Data Portal</a></p>
+        <p><a href="https://data.worldbank.org/">World Bank Open Data</a></p>
+        <p><a href="https://fred.stlouisfed.org/">FRED (St. Louis Fed)</a></p>
+        <p><a href="https://unctad.org/">UNCTAD</a></p>
+      </div>
+      <div>
+        <h4>Contribute</h4>
+        <p><a href="https://github.com/war-impact-observatory/tracker" target="_blank">GitHub Repository</a></p>
+        <p><a href="https://github.com/war-impact-observatory/tracker/discussions/categories/data-issues" target="_blank">Submit Data Issue</a></p>
+        <p><a href="https://github.com/war-impact-observatory/tracker/discussions/categories/methodology" target="_blank">Methodology Discussion</a></p>
+        <p><a href="#" onclick="document.getElementById('addCountryModal').style.display='flex';return false">Add a Country</a></p>
+      </div>
+      <div>
+        <h4>Research Context</h4>
+        <p><a href="https://watson.brown.edu/costsofwar/">Brown Costs of War</a></p>
+        <p><a href="https://www.economicsandpeace.org/">Inst. Economics &amp; Peace</a></p>
+        <p><a href="https://acleddata.com/">ACLED</a></p>
+        <p><a href="https://ucdp.uu.se/">UCDP Uppsala</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── INTERNATIONALIZATION ─────────────────────────────────────────
+var currentLang = 'en';
+
+var LANGUAGES = [
+  {code:'en',flag:'\u{1F1EC}\u{1F1E7}',name:'English'},
+  {code:'ar',flag:'\u{1F1F8}\u{1F1E6}',name:'\u0627\u0644\u0639\u0631\u0628\u064A\u0629',dir:'rtl'},
+  {code:'zh',flag:'\u{1F1E8}\u{1F1F3}',name:'\u4E2D\u6587'},
+  {code:'hi',flag:'\u{1F1EE}\u{1F1F3}',name:'\u0939\u093F\u0928\u094D\u0926\u0940'},
+  {code:'es',flag:'\u{1F1EA}\u{1F1F8}',name:'Espa\u00F1ol'},
+  {code:'fr',flag:'\u{1F1EB}\u{1F1F7}',name:'Fran\u00E7ais'},
+  {code:'pt',flag:'\u{1F1E7}\u{1F1F7}',name:'Portugu\u00EAs'},
+  {code:'ru',flag:'\u{1F1F7}\u{1F1FA}',name:'\u0420\u0443\u0441\u0441\u043A\u0438\u0439'},
+  {code:'ja',flag:'\u{1F1EF}\u{1F1F5}',name:'\u65E5\u672C\u8A9E'},
+  {code:'de',flag:'\u{1F1E9}\u{1F1EA}',name:'Deutsch'},
+  {code:'ko',flag:'\u{1F1F0}\u{1F1F7}',name:'\uD55C\uAD6D\uC5B4'},
+  {code:'tr',flag:'\u{1F1F9}\u{1F1F7}',name:'T\u00FCrk\u00E7e'},
+  {code:'it',flag:'\u{1F1EE}\u{1F1F9}',name:'Italiano'},
+  {code:'id',flag:'\u{1F1EE}\u{1F1E9}',name:'Bahasa'},
+  {code:'fa',flag:'\u{1F1EE}\u{1F1F7}',name:'\u0641\u0627\u0631\u0633\u06CC',dir:'rtl'},
+  {code:'he',flag:'\u{1F1EE}\u{1F1F1}',name:'\u05E2\u05D1\u05E8\u05D9\u05EA',dir:'rtl'},
+  {code:'ur',flag:'\u{1F1F5}\u{1F1F0}',name:'\u0627\u0631\u062F\u0648',dir:'rtl'},
+  {code:'af',flag:'\u{1F1FF}\u{1F1E6}',name:'Afrikaans'},
+];
+
+var T = {
+  // ── UI CHROME ──
+  lang_label:         {en:'Language:',ar:'\u0627\u0644\u0644\u063A\u0629:',zh:'\u8BED\u8A00\uFF1A',hi:'\u092D\u093E\u0937\u093E:',es:'Idioma:',fr:'Langue :',pt:'Idioma:',ru:'\u042F\u0437\u044B\u043A:',ja:'\u8A00\u8AA9\uFF1A',de:'Sprache:',ko:'\uC5B8\uC5B4:',tr:'Dil:',it:'Lingua:',id:'Bahasa:',fa:'\u0632\u0628\u0627\u0646:',he:'\u05E9\u05E4\u05D4:',ur:'\u0632\u0628\u0627\u0646:',af:'Taal:'},
+  live_tracker:       {en:'Live Tracker',ar:'\u0645\u062A\u0627\u0628\u0639\u0629 \u0645\u0628\u0627\u0634\u0631\u0629',zh:'\u5B9E\u65F6\u8DDF\u8E2A',hi:'\u0932\u093E\u0907\u0935 \u091F\u094D\u0930\u0948\u0915\u0930',es:'Seguimiento en vivo',fr:'Suivi en direct',pt:'Rastreador ao vivo',ru:'\u041E\u043D\u043B\u0430\u0439\u043D-\u0442\u0440\u0435\u043A\u0435\u0440',ja:'\u30E9\u30A4\u30D6\u30C8\u30E9\u30C3\u30AB\u30FC',de:'Live-Tracker',ko:'\uC2E4\uC2DC\uAC04 \uCD94\uC801\uAE30',tr:'Canl\u0131 Takip',it:'Tracker in tempo reale',id:'Pelacak Langsung',fa:'\u0631\u062F\u06CC\u0627\u0628 \u0632\u0646\u062F\u0647',he:'\u05DE\u05E2\u05E7\u05D1 \u05D7\u05D9',ur:'\u0644\u0627\u0626\u06CC\u0648 \u0679\u0631\u06CC\u06A9\u0631',af:'Lewendige Spoorsnyer'},
+  hero_title:         {en:'War Impact Observatory',ar:'\u0645\u0631\u0635\u062F \u062A\u0623\u062B\u064A\u0631 \u0627\u0644\u062D\u0631\u0628',zh:'\u6218\u4E89\u5F71\u54CD\u89C2\u6D4B\u7AD9',hi:'\u092F\u0941\u0926\u094D\u0927 \u092A\u094D\u0930\u092D\u093E\u0935 \u0928\u093F\u0930\u0940\u0915\u094D\u0937\u0923\u093E\u0932\u092F',es:'Observatorio del Impacto de la Guerra',fr:'Observatoire de l\u2019Impact de la Guerre',pt:'Observat\u00F3rio do Impacto da Guerra',ru:'\u041E\u0431\u0441\u0435\u0440\u0432\u0430\u0442\u043E\u0440\u0438\u044F \u0432\u043E\u0437\u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F \u0432\u043E\u0439\u043D\u044B',ja:'\u6226\u4E89\u5F71\u97FF\u89B3\u6E2C\u6240',de:'Kriegsauswirkungs-Observatorium',ko:'\uC804\uC7C1 \uC601\uD5A5 \uAD00\uCE21\uC18C',tr:'Sava\u015F Etki G\u00F6zlemevi',it:'Osservatorio sull\u2019Impatto della Guerra',id:'Observatorium Dampak Perang',fa:'\u0631\u0635\u062F\u062E\u0627\u0646\u0647 \u062A\u0623\u062B\u06CC\u0631 \u062C\u0646\u06AF',he:'\u05DE\u05E8\u05DB\u05D6 \u05EA\u05E6\u05E4\u05D9\u05EA \u05D4\u05E9\u05E4\u05E2\u05EA \u05D4\u05DE\u05DC\u05D7\u05DE\u05D4',ur:'\u062C\u0646\u06AF \u06A9\u06D2 \u0627\u062B\u0631\u0627\u062A \u06A9\u0627 \u0645\u0634\u0627\u06C1\u062F\u06C1',af:'Oorlog Impak Observatorium'},
+  hero_sub:           {en:'Open-source economic impact tracker for the 2026 US-Israel-Iran conflict. Measuring the cost to major economies and their citizens worldwide \u2014 oil prices, inflation, trade disruption, household costs, and second-order effects. Updated daily.',ar:'\u0645\u062A\u062A\u0628\u0639 \u0645\u0641\u062A\u0648\u062D \u0627\u0644\u0645\u0635\u062F\u0631 \u0644\u0644\u0623\u062B\u0631 \u0627\u0644\u0627\u0642\u062A\u0635\u0627\u062F\u064A \u0644\u0644\u0635\u0631\u0627\u0639 \u0627\u0644\u0623\u0645\u0631\u064A\u0643\u064A-\u0627\u0644\u0625\u0633\u0631\u0627\u0626\u064A\u0644\u064A-\u0627\u0644\u0625\u064A\u0631\u0627\u0646\u064A 2026. \u064A\u0642\u064A\u0633 \u0627\u0644\u062A\u0643\u0644\u0641\u0629 \u0639\u0644\u0649 \u0643\u0644 \u0627\u0642\u062A\u0635\u0627\u062F \u0641\u064A \u0645\u062C\u0645\u0648\u0639\u0629 \u0627\u0644\u0639\u0634\u0631\u064A\u0646.',zh:'\u5F00\u6E90\u7ECF\u6D4E\u5F71\u54CD\u8DDF\u8E2A\u5668\uFF0C\u7528\u4E8E2026\u5E74\u7F8E\u56FD-\u4EE5\u8272\u5217-\u4F0A\u6717\u51B2\u7A81\u3002\u8861\u91CFG20\u7ECF\u6D4E\u4F53\u53CA\u5176\u516C\u6C11\u7684\u6210\u672C\u2014\u2014\u77F3\u6CB9\u4EF7\u683C\u3001\u901A\u8D27\u81A8\u80C0\u3001\u8D38\u6613\u4E2D\u65AD\u3001\u5BB6\u5EAD\u6210\u672C\u3002\u6BCF\u65E5\u66F4\u65B0\u3002',hi:'\u0032\u0030\u0032\u0036 \u0905\u092E\u0947\u0930\u093F\u0915\u093E-\u0907\u091C\u0930\u093E\u0907\u0932-\u0908\u0930\u093E\u0928 \u0938\u0902\u0918\u0930\u094D\u0937 \u0915\u0947 \u0906\u0930\u094D\u0925\u093F\u0915 \u092A\u094D\u0930\u092D\u093E\u0935 \u0915\u093E \u0913\u092A\u0928-\u0938\u094B\u0930\u094D\u0938 \u091F\u094D\u0930\u0948\u0915\u0930\u0964 G20 \u0905\u0930\u094D\u0925\u0935\u094D\u092F\u0935\u0938\u094D\u0925\u093E\u0913\u0902 \u0914\u0930 \u0928\u093E\u0917\u0930\u093F\u0915\u094B\u0902 \u092A\u0930 \u0932\u093E\u0917\u0924 \u092E\u093E\u092A\u0928\u093E\u0964 \u0926\u0948\u0928\u093F\u0915 \u0905\u092A\u0921\u0947\u091F\u0964',es:'Rastreador de impacto econ\u00F3mico de c\u00F3digo abierto para el conflicto EE.UU.-Israel-Ir\u00E1n de 2026. Midiendo el costo para cada econom\u00EDa del G20 y sus ciudadanos. Actualizado diariamente.',fr:'Suivi d\u2019impact \u00E9conomique open source pour le conflit \u00C9tats-Unis-Isra\u00EBl-Iran 2026. Mesure du co\u00FBt pour chaque \u00E9conomie du G20 et ses citoyens. Mis \u00E0 jour quotidiennement.',pt:'Rastreador de impacto econ\u00F4mico de c\u00F3digo aberto para o conflito EUA-Israel-Ir\u00E3 de 2026. Medindo o custo para cada economia do G20 e seus cidad\u00E3os. Atualizado diariamente.',ru:'\u041E\u0442\u043A\u0440\u044B\u0442\u044B\u0439 \u0442\u0440\u0435\u043A\u0435\u0440 \u044D\u043A\u043E\u043D\u043E\u043C\u0438\u0447\u0435\u0441\u043A\u043E\u0433\u043E \u0432\u043E\u0437\u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F \u043A\u043E\u043D\u0444\u043B\u0438\u043A\u0442\u0430 \u0421\u0428\u0410-\u0418\u0437\u0440\u0430\u0438\u043B\u044C-\u0418\u0440\u0430\u043D 2026. \u0418\u0437\u043C\u0435\u0440\u0435\u043D\u0438\u0435 \u0437\u0430\u0442\u0440\u0430\u0442 \u0434\u043B\u044F \u044D\u043A\u043E\u043D\u043E\u043C\u0438\u043A \u0413-20 \u0438 \u0438\u0445 \u0433\u0440\u0430\u0436\u0434\u0430\u043D. \u041E\u0431\u043D\u043E\u0432\u043B\u044F\u0435\u0442\u0441\u044F \u0435\u0436\u0435\u0434\u043D\u0435\u0432\u043D\u043E.',ja:'2026\u5E74\u7C73\u56FD\u30FB\u30A4\u30B9\u30E9\u30A8\u30EB\u30FB\u30A4\u30E9\u30F3\u7D1B\u4E89\u306E\u30AA\u30FC\u30D7\u30F3\u30BD\u30FC\u30B9\u7D4C\u6E08\u5F71\u97FF\u30C8\u30E9\u30C3\u30AB\u30FC\u3002G20\u7D4C\u6E08\u3068\u5E02\u6C11\u3078\u306E\u30B3\u30B9\u30C8\u3092\u6E2C\u5B9A\u3002\u6BCE\u65E5\u66F4\u65B0\u3002',de:'Open-Source-Tracker f\u00FCr die wirtschaftlichen Auswirkungen des US-Israel-Iran-Konflikts 2026. Messung der Kosten f\u00FCr jede G20-Wirtschaft und ihre B\u00FCrger. T\u00E4glich aktualisiert.',ko:'2026\uB144 \uBBF8\uAD6D-\uC774\uC2A4\uB77C\uC5D8-\uC774\uB780 \uBD84\uC7C1\uC758 \uACBD\uC81C\uC801 \uC601\uD5A5\uC744 \uCD94\uC801\uD558\uB294 \uC624\uD508\uC18C\uC2A4 \uD2B8\uB798\uCEE4. G20 \uACBD\uC81C\uC640 \uC2DC\uBBFC\uC5D0\uAC8C \uBBF8\uCE58\uB294 \uBE44\uC6A9\uC744 \uCE21\uC815. \uB9E4\uC77C \uC5C5\uB370\uC774\uD2B8.',tr:'2026 ABD-\u0130srail-\u0130ran \u00E7at\u0131\u015Fmas\u0131n\u0131n ekonomik etkisini takip eden a\u00E7\u0131k kaynak ara\u00E7. G20 ekonomileri ve vatanda\u015Flar\u0131na maliyeti \u00F6l\u00E7\u00FCyor. G\u00FCnl\u00FCk g\u00FCncelleme.',it:'Tracker open source dell\u2019impatto economico del conflitto USA-Israele-Iran 2026. Misura il costo per ogni economia del G20 e i suoi cittadini. Aggiornato quotidianamente.',id:'Pelacak dampak ekonomi sumber terbuka untuk konflik AS-Israel-Iran 2026. Mengukur biaya pada setiap ekonomi G20 dan warganya. Diperbarui setiap hari.',fa:'\u0631\u062F\u06CC\u0627\u0628 \u0645\u0646\u0628\u0639 \u0628\u0627\u0632 \u062A\u0623\u062B\u06CC\u0631 \u0627\u0642\u062A\u0635\u0627\u062F\u06CC \u062F\u0631\u06AF\u06CC\u0631\u06CC \u0622\u0645\u0631\u06CC\u06A9\u0627-\u0627\u0633\u0631\u0627\u0626\u06CC\u0644-\u0627\u06CC\u0631\u0627\u0646 \u06F2\u06F0\u06F2\u06F6. \u0627\u0646\u062F\u0627\u0632\u0647\u200C\u06AF\u06CC\u0631\u06CC \u0647\u0632\u06CC\u0646\u0647 \u0628\u0631\u0627\u06CC \u0647\u0631 \u0627\u0642\u062A\u0635\u0627\u062F G20. \u0628\u0647\u200C\u0631\u0648\u0632\u0631\u0633\u0627\u0646\u06CC \u0631\u0648\u0632\u0627\u0646\u0647.',he:'\u05DE\u05E2\u05E7\u05D1 \u05E7\u05D5\u05D3 \u05E4\u05EA\u05D5\u05D7 \u05DC\u05D4\u05E9\u05E4\u05E2\u05D4 \u05D4\u05DB\u05DC\u05DB\u05DC\u05D9\u05EA \u05E9\u05DC \u05E2\u05D9\u05DE\u05D5\u05EA \u05D0\u05E8\u05D4"\u05D1-\u05D9\u05E9\u05E8\u05D0\u05DC-\u05D0\u05D9\u05E8\u05D0\u05DF 2026. \u05DE\u05D5\u05D3\u05D3 \u05E2\u05DC\u05D5\u05D9\u05D5\u05EA \u05DC\u05DB\u05DC \u05DB\u05DC\u05DB\u05DC\u05EA G20 \u05D5\u05D0\u05D6\u05E8\u05D7\u05D9\u05D4. \u05DE\u05EA\u05E2\u05D3\u05DB\u05DF \u05D9\u05D5\u05DE\u05D9\u05D5\u05DE\u05D9\u05EA.',ur:'2026 \u0627\u0645\u0631\u06CC\u06A9\u0627-\u0627\u0633\u0631\u0627\u0626\u06CC\u0644-\u0627\u06CC\u0631\u0627\u0646 \u062A\u0646\u0627\u0632\u0639\u06C1 \u06A9\u06D2 \u0627\u0642\u062A\u0635\u0627\u062F\u06CC \u0627\u062B\u0631\u0627\u062A \u06A9\u0627 \u0627\u0648\u067E\u0646 \u0633\u0648\u0631\u0633 \u0679\u0631\u06CC\u06A9\u0631\u06D4 G20 \u0645\u0639\u06CC\u0634\u062A\u0648\u06BA \u0627\u0648\u0631 \u0634\u06C1\u0631\u06CC\u0648\u06BA \u067E\u0631 \u0644\u0627\u06AF\u062A \u06A9\u06CC \u067E\u06CC\u0645\u0627\u0626\u0634\u06D4 \u0631\u0648\u0632\u0627\u0646\u06C1 \u0627\u067E \u0688\u06CC\u0679\u06D4',af:'Oopbron ekonomiese impak spoorsnyer vir die 2026 VSA-Israel-Iran konflik. Meet die koste vir elke G20-ekonomie en sy burgers. Daagliks opgedateer.'},
+  // ── NAV TABS ──
+  tab_dashboard:      {en:'Dashboard',ar:'\u0644\u0648\u062D\u0629 \u0627\u0644\u0645\u0639\u0644\u0648\u0645\u0627\u062A',zh:'\u4EEA\u8868\u677F',hi:'\u0921\u0948\u0936\u092C\u094B\u0930\u094D\u0921',es:'Panel',fr:'Tableau de bord',pt:'Painel',ru:'\u041F\u0430\u043D\u0435\u043B\u044C',ja:'\u30C0\u30C3\u30B7\u30E5\u30DC\u30FC\u30C9',de:'\u00DCbersicht',ko:'\uB300\uC2DC\uBCF4\uB4DC',tr:'Pano',it:'Pannello',id:'Dasbor',fa:'\u062F\u0627\u0634\u0628\u0648\u0631\u062F',he:'\u05DC\u05D5\u05D7 \u05D1\u05E7\u05E8\u05D4',ur:'\u0688\u06CC\u0634 \u0628\u0648\u0631\u0688',af:'Kontrolepaneel'},
+  tab_countries:      {en:'Country Impact',ar:'\u062A\u0623\u062B\u064A\u0631 \u0627\u0644\u062F\u0648\u0644',zh:'\u56FD\u5BB6\u5F71\u54CD',hi:'\u0926\u0947\u0936 \u092A\u094D\u0930\u092D\u093E\u0935',es:'Impacto por pa\u00EDs',fr:'Impact par pays',pt:'Impacto por pa\u00EDs',ru:'\u0412\u043B\u0438\u044F\u043D\u0438\u0435 \u043F\u043E \u0441\u0442\u0440\u0430\u043D\u0430\u043C',ja:'\u56FD\u5225\u5F71\u97FF',de:'L\u00E4nderauswirkung',ko:'\uAD6D\uAC00\uBCC4 \uC601\uD5A5',tr:'\u00DClke Etkisi',it:'Impatto per paese',id:'Dampak Negara',fa:'\u062A\u0623\u062B\u06CC\u0631 \u06A9\u0634\u0648\u0631\u06CC',he:'\u05D4\u05E9\u05E4\u05E2\u05D4 \u05DC\u05E4\u05D9 \u05DE\u05D3\u05D9\u05E0\u05D4',ur:'\u0645\u0644\u06A9\u06CC \u0627\u062B\u0631\u0627\u062A',af:'Land Impak'},
+  tab_channels:       {en:'Impact Channels',ar:'\u0642\u0646\u0648\u0627\u062A \u0627\u0644\u062A\u0623\u062B\u064A\u0631',zh:'\u5F71\u54CD\u6E20\u9053',hi:'\u092A\u094D\u0930\u092D\u093E\u0935 \u091A\u0948\u0928\u0932',es:'Canales de impacto',fr:'Canaux d\u2019impact',pt:'Canais de impacto',ru:'\u041A\u0430\u043D\u0430\u043B\u044B \u0432\u043E\u0437\u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044F',ja:'\u5F71\u97FF\u30C1\u30E3\u30CD\u30EB',de:'Wirkungskan\u00E4le',ko:'\uC601\uD5A5 \uCC44\uB110',tr:'Etki Kanallar\u0131',it:'Canali di impatto',id:'Saluran Dampak',fa:'\u06A9\u0627\u0646\u0627\u0644\u200C\u0647\u0627\u06CC \u062A\u0623\u062B\u06CC\u0631',he:'\u05E2\u05E8\u05D5\u05E6\u05D9 \u05D4\u05E9\u05E4\u05E2\u05D4',ur:'\u0627\u062B\u0631\u0627\u062A \u06A9\u06D2 \u0630\u0631\u0627\u0626\u0639',af:'Impak Kanale'},
+  tab_methodology:    {en:'Methodology & Critique',ar:'\u0627\u0644\u0645\u0646\u0647\u062C\u064A\u0629 \u0648\u0627\u0644\u0646\u0642\u062F',zh:'\u65B9\u6CD5\u8BBA\u4E0E\u8BC4\u4F30',hi:'\u0915\u093E\u0930\u094D\u092F\u092A\u094D\u0930\u0923\u093E\u0932\u0940 \u0914\u0930 \u0938\u092E\u0940\u0915\u094D\u0937\u093E',es:'Metodolog\u00EDa y cr\u00EDtica',fr:'M\u00E9thodologie et critique',pt:'Metodologia e cr\u00EDtica',ru:'\u041C\u0435\u0442\u043E\u0434\u043E\u043B\u043E\u0433\u0438\u044F \u0438 \u043A\u0440\u0438\u0442\u0438\u043A\u0430',ja:'\u65B9\u6CD5\u8AD6\u3068\u8A55\u4FA1',de:'Methodik & Kritik',ko:'\uBC29\uBC95\uB860 \uBC0F \uBE44\uD3C9',tr:'Metodoloji ve Ele\u015Ftiri',it:'Metodologia e critica',id:'Metodologi & Kritik',fa:'\u0631\u0648\u0634\u200C\u0634\u0646\u0627\u0633\u06CC \u0648 \u0646\u0642\u062F',he:'\u05DE\u05EA\u05D5\u05D3\u05D5\u05DC\u05D5\u05D2\u05D9\u05D4 \u05D5\u05D1\u05D9\u05E7\u05D5\u05E8\u05EA',ur:'\u0637\u0631\u06CC\u0642\u06C1 \u06A9\u0627\u0631 \u0627\u0648\u0631 \u062A\u0646\u0642\u06CC\u062F',af:'Metodologie & Kritiek'},
+  tab_media:          {en:'Media Kit',ar:'\u0645\u0644\u0641 \u0625\u0639\u0644\u0627\u0645\u064A',zh:'\u5A92\u4F53\u5957\u4EF6',hi:'\u092E\u0940\u0921\u093F\u092F\u093E \u0915\u093F\u091F',es:'Kit de prensa',fr:'Kit m\u00E9dia',pt:'Kit de m\u00EDdia',ru:'\u041C\u0435\u0434\u0438\u0430-\u043A\u0438\u0442',ja:'\u30E1\u30C7\u30A3\u30A2\u30AD\u30C3\u30C8',de:'Medien-Kit',ko:'\uBBF8\uB514\uC5B4 \uD0A4\uD2B8',tr:'Medya Kiti',it:'Kit media',id:'Kit Media',fa:'\u06A9\u06CC\u062A \u0631\u0633\u0627\u0646\u0647',he:'\u05E2\u05E8\u05DB\u05EA \u05DE\u05D3\u05D9\u05D4',ur:'\u0645\u06CC\u0688\u06CC\u0627 \u06A9\u0679',af:'Media Stel'},
+  tab_pipeline:       {en:'Daily Pipeline',ar:'\u062E\u0637 \u0627\u0644\u0628\u064A\u0627\u0646\u0627\u062A \u0627\u0644\u064A\u0648\u0645\u064A',zh:'\u6BCF\u65E5\u6570\u636E\u7BA1\u9053',hi:'\u0926\u0948\u0928\u093F\u0915 \u092A\u093E\u0907\u092A\u0932\u093E\u0907\u0928',es:'Pipeline diario',fr:'Pipeline quotidien',pt:'Pipeline di\u00E1rio',ru:'\u0415\u0436\u0435\u0434\u043D\u0435\u0432\u043D\u044B\u0439 \u043A\u043E\u043D\u0432\u0435\u0439\u0435\u0440',ja:'\u65E5\u6B21\u30D1\u30A4\u30D7\u30E9\u30A4\u30F3',de:'T\u00E4gliche Pipeline',ko:'\uC77C\uC77C \uD30C\uC774\uD504\uB77C\uC778',tr:'G\u00FCnl\u00FCk Veri Hatt\u0131',it:'Pipeline giornaliero',id:'Pipeline Harian',fa:'\u062E\u0637 \u0644\u0648\u0644\u0647 \u0631\u0648\u0632\u0627\u0646\u0647',he:'\u05E6\u05D9\u05E0\u05D5\u05E8 \u05D9\u05D5\u05DE\u05D9',ur:'\u0631\u0648\u0632\u0627\u0646\u06C1 \u067E\u0627\u0626\u067E \u0644\u0627\u0626\u0646',af:'Daaglikse Pyplyn'},
+  // ── KPI LABELS ──
+  kpi_brent:          {en:'Brent Crude',ar:'\u062E\u0627\u0645 \u0628\u0631\u0646\u062A',zh:'\u5E03\u4F26\u7279\u539F\u6CB9',hi:'\u092C\u094D\u0930\u0947\u0902\u091F \u0915\u094D\u0930\u0942\u0921',es:'Crudo Brent',fr:'Brut Brent',pt:'Brent Bruto',ru:'\u041D\u0435\u0444\u0442\u044C Brent',ja:'\u30D6\u30EC\u30F3\u30C8\u539F\u6CB9',de:'Brent-Roh\u00F6l',ko:'\uBE0C\uB80C\uD2B8\uC720',tr:'Brent Petrol',it:'Brent Greggio',id:'Minyak Brent',fa:'\u0646\u0641\u062A \u0628\u0631\u0646\u062A',he:'\u05E0\u05E4\u05D8 \u05D1\u05E8\u05E0\u05D8',ur:'\u0628\u0631\u06CC\u0646\u0679 \u062E\u0627\u0645',af:'Brent Ru-olie'},
+  kpi_gas:            {en:'US Gas Price',ar:'\u0633\u0639\u0631 \u0627\u0644\u0628\u0646\u0632\u064A\u0646 \u0627\u0644\u0623\u0645\u0631\u064A\u0643\u064A',zh:'\u7F8E\u56FD\u6C7D\u6CB9\u4EF7',hi:'US \u0917\u0948\u0938 \u0915\u0940\u092E\u0924',es:'Gasolina EE.UU.',fr:'Essence US',pt:'Gasolina EUA',ru:'\u0426\u0435\u043D\u0430 \u0431\u0435\u043D\u0437\u0438\u043D\u0430 \u0421\u0428\u0410',ja:'\u7C73\u56FD\u30AC\u30BD\u30EA\u30F3\u4FA1\u683C',de:'US-Benzinpreis',ko:'\uBBF8\uAD6D \uD718\uBC1C\uC720\uAC00',tr:'ABD Benzin Fiyat\u0131',it:'Benzina USA',id:'Harga BBM AS',fa:'\u0642\u06CC\u0645\u062A \u0628\u0646\u0632\u06CC\u0646 \u0622\u0645\u0631\u06CC\u06A9\u0627',he:'\u05DE\u05D7\u05D9\u05E8 \u05D3\u05DC\u05E7 \u05D0\u05E8\u05D4"\u05D1',ur:'US \u06AF\u06CC\u0633 \u0642\u06CC\u0645\u062A',af:'VSA Brandstofprys'},
+  kpi_inflation:      {en:'Global Inflation',ar:'\u0627\u0644\u062A\u0636\u062E\u0645 \u0627\u0644\u0639\u0627\u0644\u0645\u064A',zh:'\u5168\u7403\u901A\u80C0',hi:'\u0935\u0948\u0936\u094D\u0935\u093F\u0915 \u092E\u0941\u0926\u094D\u0930\u093E\u0938\u094D\u092B\u0940\u0924\u093F',es:'Inflaci\u00F3n global',fr:'Inflation mondiale',pt:'Infla\u00E7\u00E3o global',ru:'\u041C\u0438\u0440\u043E\u0432\u0430\u044F \u0438\u043D\u0444\u043B\u044F\u0446\u0438\u044F',ja:'\u4E16\u754C\u30A4\u30F3\u30D5\u30EC',de:'Globale Inflation',ko:'\uAE00\uB85C\uBC8C \uC778\uD50C\uB808\uC774\uC158',tr:'K\u00FCresel Enflasyon',it:'Inflazione globale',id:'Inflasi Global',fa:'\u062A\u0648\u0631\u0645 \u062C\u0647\u0627\u0646\u06CC',he:'\u05D0\u05D9\u05E0\u05E4\u05DC\u05E6\u05D9\u05D4 \u05E2\u05D5\u05DC\u05DE\u05D9\u05EA',ur:'\u0639\u0627\u0644\u0645\u06CC \u0627\u0641\u0631\u0627\u0637 \u0632\u0631',af:'Globale Inflasie'},
+  kpi_hormuz:         {en:'Hormuz Transits',ar:'\u0639\u0628\u0648\u0631 \u0647\u0631\u0645\u0632',zh:'\u970D\u5C14\u6728\u5179\u901A\u884C',hi:'\u0939\u094B\u0930\u094D\u092E\u0941\u091C \u092A\u093E\u0930\u0917\u092E\u0928',es:'Tr\u00E1nsitos Ormuz',fr:'Transits Ormuz',pt:'Tr\u00E2nsitos Ormuz',ru:'\u0422\u0440\u0430\u043D\u0437\u0438\u0442 \u0413\u043E\u0440\u043C\u0443\u0437',ja:'\u30DB\u30EB\u30E0\u30BA\u901A\u904E',de:'Hormus-Durchfahrten',ko:'\uD638\uB974\uBB34\uC988 \uD1B5\uACFC',tr:'H\u00FCrm\u00FCz Ge\u00E7i\u015Fleri',it:'Transiti Hormuz',id:'Transit Hormuz',fa:'\u062A\u0631\u062F\u062F \u0647\u0631\u0645\u0632',he:'\u05DE\u05E2\u05D1\u05E8\u05D9 \u05D4\u05D5\u05E8\u05DE\u05D5\u05D6',ur:'\u06C1\u0631\u0645\u0632 \u06AF\u0632\u0631\u06AF\u0627\u06C1\u06CC\u06BA',af:'Hormuz Deurgang'},
+  kpi_supply:         {en:'Supply Disrupted',ar:'\u0627\u0646\u0642\u0637\u0627\u0639 \u0627\u0644\u0625\u0645\u062F\u0627\u062F\u0627\u062A',zh:'\u4F9B\u5E94\u4E2D\u65AD',hi:'\u0906\u092A\u0942\u0930\u094D\u0924\u093F \u0935\u094D\u092F\u0935\u0927\u093E\u0928',es:'Suministro interrumpido',fr:'Approvisionnement perturb\u00E9',pt:'Fornecimento interrompido',ru:'\u041D\u0430\u0440\u0443\u0448\u0435\u043D\u0438\u0435 \u043F\u043E\u0441\u0442\u0430\u0432\u043E\u043A',ja:'\u4F9B\u7D66\u4E2D\u65AD',de:'Versorgungsst\u00F6rung',ko:'\uACF5\uAE09 \uCC28\uC9C8',tr:'Arz Kesintisi',it:'Fornitura interrotta',id:'Pasokan Terganggu',fa:'\u0627\u062E\u062A\u0644\u0627\u0644 \u0639\u0631\u0636\u0647',he:'\u05E9\u05D9\u05D1\u05D5\u05E9 \u05D0\u05E1\u05E4\u05E7\u05D4',ur:'\u0633\u067E\u0644\u0627\u0626\u06CC \u0645\u06CC\u06BA \u062E\u0644\u0644',af:'Voorraad Ontwrig'},
+  kpi_days:           {en:'Days of Conflict',ar:'\u0623\u064A\u0627\u0645 \u0627\u0644\u0635\u0631\u0627\u0639',zh:'\u51B2\u7A01\u5929\u6570',hi:'\u0938\u0902\u0918\u0930\u094D\u0937 \u0915\u0947 \u0926\u093F\u0928',es:'D\u00EDas de conflicto',fr:'Jours de conflit',pt:'Dias de conflito',ru:'\u0414\u043D\u0435\u0439 \u043A\u043E\u043D\u0444\u043B\u0438\u043A\u0442\u0430',ja:'\u7D1B\u4E89\u65E5\u6570',de:'Konflikttage',ko:'\uBD84\uC7C1 \uC77C\uC218',tr:'\u00C7at\u0131\u015Fma G\u00FCn\u00FC',it:'Giorni di conflitto',id:'Hari Konflik',fa:'\u0631\u0648\u0632\u0647\u0627\u06CC \u062F\u0631\u06AF\u06CC\u0631\u06CC',he:'\u05D9\u05DE\u05D9 \u05E2\u05D9\u05DE\u05D5\u05EA',ur:'\u062A\u0646\u0627\u0632\u0639\u06C1 \u06A9\u06D2 \u062F\u0646',af:'Dae van Konflik'},
+  // ── TABLE HEADERS ──
+  th_country:         {en:'Country',ar:'\u0627\u0644\u062F\u0648\u0644\u0629',zh:'\u56FD\u5BB6',hi:'\u0926\u0947\u0936',es:'Pa\u00EDs',fr:'Pays',pt:'Pa\u00EDs',ru:'\u0421\u0442\u0440\u0430\u043D\u0430',ja:'\u56FD',de:'Land',ko:'\uAD6D\uAC00',tr:'\u00DClke',it:'Paese',id:'Negara',fa:'\u06A9\u0634\u0648\u0631',he:'\u05DE\u05D3\u05D9\u05E0\u05D4',ur:'\u0645\u0644\u06A9',af:'Land'},
+  th_severity:        {en:'Severity',ar:'\u0627\u0644\u062E\u0637\u0648\u0631\u0629',zh:'\u4E25\u91CD\u7A0B\u5EA6',hi:'\u0917\u0902\u092D\u0940\u0930\u0924\u093E',es:'Severidad',fr:'S\u00E9v\u00E9rit\u00E9',pt:'Gravidade',ru:'\u0421\u0435\u0440\u044C\u0451\u0437\u043D\u043E\u0441\u0442\u044C',ja:'\u6DF1\u523B\u5EA6',de:'Schweregrad',ko:'\uC2EC\uAC01\uB3C4',tr:'\u015Eiddet',it:'Gravit\u00E0',id:'Keparahan',fa:'\u0634\u062F\u062A',he:'\u05D7\u05D5\u05DE\u05E8\u05D4',ur:'\u0634\u062F\u062A',af:'Erns'},
+  th_inflation:       {en:'Inflation Impact',ar:'\u062A\u0623\u062B\u064A\u0631 \u0627\u0644\u062A\u0636\u062E\u0645',zh:'\u901A\u80C0\u5F71\u54CD',hi:'\u092E\u0941\u0926\u094D\u0930\u093E\u0938\u094D\u092B\u0940\u0924\u093F \u092A\u094D\u0930\u092D\u093E\u0935',es:'Impacto inflaci\u00F3n',fr:'Impact inflation',pt:'Impacto infla\u00E7\u00E3o',ru:'\u0412\u043B\u0438\u044F\u043D\u0438\u0435 \u043D\u0430 \u0438\u043D\u0444\u043B\u044F\u0446\u0438\u044E',ja:'\u30A4\u30F3\u30D5\u30EC\u5F71\u97FF',de:'Inflationsauswirkung',ko:'\uC778\uD50C\uB808 \uC601\uD5A5',tr:'Enflasyon Etkisi',it:'Impatto inflazione',id:'Dampak Inflasi',fa:'\u062A\u0623\u062B\u06CC\u0631 \u062A\u0648\u0631\u0645',he:'\u05D4\u05E9\u05E4\u05E2\u05EA \u05D0\u05D9\u05E0\u05E4\u05DC\u05E6\u05D9\u05D4',ur:'\u0627\u0641\u0631\u0627\u0637 \u0632\u0631 \u0627\u062B\u0631',af:'Inflasie Impak'},
+  th_gdp:             {en:'GDP Impact',ar:'\u062A\u0623\u062B\u064A\u0631 \u0627\u0644\u0646\u0627\u062A\u062C',zh:'GDP\u5F71\u54CD',hi:'GDP \u092A\u094D\u0930\u092D\u093E\u0935',es:'Impacto PIB',fr:'Impact PIB',pt:'Impacto PIB',ru:'\u0412\u043B\u0438\u044F\u043D\u0438\u0435 \u043D\u0430 \u0412\u0412\u041F',ja:'GDP\u5F71\u97FF',de:'BIP-Auswirkung',ko:'GDP \uC601\uD5A5',tr:'GSY\u0130H Etkisi',it:'Impatto PIL',id:'Dampak PDB',fa:'\u062A\u0623\u062B\u06CC\u0631 GDP',he:'\u05D4\u05E9\u05E4\u05E2\u05EA \u05EA\u05DE"\u05D2',ur:'GDP \u0627\u062B\u0631',af:'BBP Impak'},
+  th_household:       {en:'Household Cost/yr',ar:'\u062A\u0643\u0644\u0641\u0629 \u0627\u0644\u0623\u0633\u0631\u0629/\u0633\u0646\u0629',zh:'\u5BB6\u5EAD\u6210\u672C/\u5E74',hi:'\u0918\u0930\u0947\u0932\u0942 \u0932\u093E\u0917\u0924/\u0935\u0930\u094D\u0937',es:'Costo hogar/a\u00F1o',fr:'Co\u00FBt m\u00E9nage/an',pt:'Custo fam\u00EDlia/ano',ru:'\u0420\u0430\u0441\u0445\u043E\u0434\u044B \u0434\u043E\u043C\u043E\u0445\u043E\u0437\u044F\u0439\u0441\u0442\u0432/\u0433\u043E\u0434',ja:'\u4E16\u5E2F\u8CBB\u7528/\u5E74',de:'Haushaltskosten/Jahr',ko:'\uAC00\uACC4 \uBE44\uC6A9/\uB144',tr:'Hane Maliyeti/y\u0131l',it:'Costo famiglia/anno',id:'Biaya rumah tangga/thn',fa:'\u0647\u0632\u06CC\u0646\u0647 \u062E\u0627\u0646\u0648\u0627\u0631/\u0633\u0627\u0644',he:'\u05E2\u05DC\u05D5\u05EA \u05DE\u05E9\u05E7 \u05D1\u05D9\u05EA/\u05E9\u05E0\u05D4',ur:'\u06AF\u06BE\u0631\u06CC\u0644\u0648 \u0644\u0627\u06AF\u062A/\u0633\u0627\u0644',af:'Huishoudelike Koste/jaar'},
+  th_pperosion:       {en:'Buying Power Loss',ar:'\u0641\u0642\u062F\u0627\u0646 \u0627\u0644\u0642\u0648\u0629 \u0627\u0644\u0634\u0631\u0627\u0626\u064A\u0629',zh:'\u8D2D\u4E70\u529B\u640A\u5931',hi:'\u0915\u094D\u0930\u092F \u0936\u0915\u094D\u0924\u093F \u0939\u093E\u0928\u093F',es:'P\u00E9rdida poder adquisitivo',fr:'Perte pouvoir d\'achat',pt:'Perda poder de compra',ru:'\u041F\u043E\u0442\u0435\u0440\u044F \u043F\u043E\u043A\u0443\u043F\u0430\u0442\u0435\u043B\u044C\u043D\u043E\u0439 \u0441\u043F\u043E\u0441\u043E\u0431\u043D\u043E\u0441\u0442\u0438',ja:'\u8CFC\u8CB7\u529B\u4F4E\u4E0B',de:'Kaufkraftverlust',ko:'\uAD6C\ub9e4\ub825 \uc190\uc2e4',tr:'Al\u0131m G\u00FC\u00E7\u00FC Kayb\u0131',it:'Perdita potere d\'acquisto',id:'Kehilangan Daya Beli',fa:'\u06A9\u0627\u0647\u0634 \u0642\u062F\u0631\u062A \u062E\u0631\u06CC\u062F',he:'\u05D0\u05D5\u05D1\u05D3\u05DF \u05DB\u05D5\u05D7 \u05E7\u05E0\u05D9\u05D9\u05D4',ur:'\u0642\u0648\u062A \u062E\u0631\u06CC\u062F \u0645\u06CC\u06BA \u06A9\u0645\u06CC',af:'Koopkragverlies'},
+  th_ffshift:         {en:'Budget Squeeze',ar:'\u0636\u063A\u0637 \u0627\u0644\u0645\u064A\u0632\u0627\u0646\u064A\u0629',zh:'\u9884\u7B97\u6321\u538B',hi:'\u092C\u091C\u0947\u0924 \u0926\u092C\u093E\u0935',es:'Presi\u00F3n presupuestaria',fr:'Pression budg\u00E9taire',pt:'Aperto or\u00E7ament\u00E1rio',ru:'\u0421\u0436\u0430\u0442\u0438\u0435 \u0431\u044E\u0434\u0436\u0435\u0442\u0430',ja:'\u5BB6\u8A08\u5727\u8FFD',de:'Budgetdruck',ko:'\uAC00\uACC4 \uC555\uBC15',tr:'B\u00FCt\u00E7e Bask\u0131s\u0131',it:'Pressione sul bilancio',id:'Tekanan Anggaran',fa:'\u0641\u0634\u0627\u0631 \u0628\u0648\u062F\u062C\u0647',he:'\u05DC\u05D7\u05E5 \u05EA\u05E7\u05E6\u05D9\u05D1\u05D9',ur:'\u0628\u062C\u0679 \u062F\u0628\u0627\u0624',af:'Begrotingsdruk'},
+  th_fuel:            {en:'Fuel Price \u2191',ar:'\u0633\u0639\u0631 \u0627\u0644\u0648\u0642\u0648\u062F \u2191',zh:'\u71C3\u6599\u4EF7\u683C \u2191',hi:'\u0908\u0902\u0927\u0928 \u0915\u0940\u092E\u0924 \u2191',es:'Precio combustible \u2191',fr:'Prix carburant \u2191',pt:'Pre\u00E7o combust\u00EDvel \u2191',ru:'\u0426\u0435\u043D\u0430 \u0442\u043E\u043F\u043B\u0438\u0432\u0430 \u2191',ja:'\u71C3\u6599\u4FA1\u683C \u2191',de:'Kraftstoffpreis \u2191',ko:'\uC5F0\uB8CC\uAC00 \u2191',tr:'Yak\u0131t Fiyat\u0131 \u2191',it:'Prezzo carburante \u2191',id:'Harga BBM \u2191',fa:'\u0642\u06CC\u0645\u062A \u0633\u0648\u062E\u062A \u2191',he:'\u05DE\u05D7\u05D9\u05E8 \u05D3\u05DC\u05E7 \u2191',ur:'\u0627\u06CC\u0646\u062F\u06BE\u0646 \u0642\u06CC\u0645\u062A \u2191',af:'Brandstofprys \u2191'},
+  th_food:            {en:'Food Price \u2191',ar:'\u0633\u0639\u0631 \u0627\u0644\u063A\u0630\u0627\u0621 \u2191',zh:'\u98DF\u54C1\u4EF7\u683C \u2191',hi:'\u0916\u093E\u0926\u094D\u092F \u0915\u0940\u092E\u0924 \u2191',es:'Precio alimentos \u2191',fr:'Prix alimentation \u2191',pt:'Pre\u00E7o alimentos \u2191',ru:'\u0426\u0435\u043D\u0430 \u043F\u0440\u043E\u0434\u043E\u0432\u043E\u043B\u044C\u0441\u0442\u0432\u0438\u044F \u2191',ja:'\u98DF\u54C1\u4FA1\u683C \u2191',de:'Lebensmittelpreis \u2191',ko:'\uC2DD\uD488\uAC00 \u2191',tr:'G\u0131da Fiyat\u0131 \u2191',it:'Prezzo cibo \u2191',id:'Harga Pangan \u2191',fa:'\u0642\u06CC\u0645\u062A \u063A\u0630\u0627 \u2191',he:'\u05DE\u05D7\u05D9\u05E8 \u05DE\u05D6\u05D5\u05DF \u2191',ur:'\u062E\u0648\u0631\u0627\u06A9 \u0642\u06CC\u0645\u062A \u2191',af:'Voedselprys \u2191'},
+  th_currency:        {en:'Currency',ar:'\u0627\u0644\u0639\u0645\u0644\u0629',zh:'\u8D27\u5E01',hi:'\u092E\u0941\u0926\u094D\u0930\u093E',es:'Moneda',fr:'Devise',pt:'Moeda',ru:'\u0412\u0430\u043B\u044E\u0442\u0430',ja:'\u901A\u8CA8',de:'W\u00E4hrung',ko:'\uD1B5\uD654',tr:'Para Birimi',it:'Valuta',id:'Mata Uang',fa:'\u0627\u0631\u0632',he:'\u05DE\u05D8\u05D1\u05E2',ur:'\u06A9\u0631\u0646\u0633\u06CC',af:'Geldeenheid'},
+  // ── SECTION TITLES ──
+  sec_trade:          {en:'Trade & Supply Chain Disruption',ar:'\u0627\u0636\u0637\u0631\u0627\u0628 \u0627\u0644\u062A\u062C\u0627\u0631\u0629 \u0648\u0633\u0644\u0627\u0633\u0644 \u0627\u0644\u0625\u0645\u062F\u0627\u062F',zh:'\u8D38\u6613\u4E0E\u4F9B\u5E94\u94FE\u4E2D\u65AD',hi:'\u0935\u094D\u092F\u093E\u092A\u093E\u0930 \u0914\u0930 \u0906\u092A\u0942\u0930\u094D\u0924\u093F \u0936\u094D\u0930\u0943\u0902\u0916\u0932\u093E \u0935\u094D\u092F\u0935\u0927\u093E\u0928',es:'Disrupci\u00F3n comercial y cadena de suministro',fr:'Perturbation du commerce et de la cha\u00EEne d\u2019approvisionnement',pt:'Interrup\u00E7\u00E3o do com\u00E9rcio e cadeia de suprimentos',ru:'\u041D\u0430\u0440\u0443\u0448\u0435\u043D\u0438\u0435 \u0442\u043E\u0440\u0433\u043E\u0432\u043B\u0438 \u0438 \u0446\u0435\u043F\u043E\u0447\u0435\u043A \u043F\u043E\u0441\u0442\u0430\u0432\u043E\u043A',ja:'\u8CBF\u6613\u30FB\u30B5\u30D7\u30E9\u30A4\u30C1\u30A7\u30FC\u30F3\u6DF7\u4E71',de:'Handels- & Lieferkettenst\u00F6rung',ko:'\uBB34\uC5ED \uBC0F \uACF5\uAE09\uB9DD \uD63C\uB780',tr:'Ticaret ve Tedarik Zinciri Aksamas\u0131',it:'Interruzione commerciale e catena di fornitura',id:'Gangguan Perdagangan & Rantai Pasokan',fa:'\u0627\u062E\u062A\u0644\u0627\u0644 \u062A\u062C\u0627\u0631\u062A \u0648 \u0632\u0646\u062C\u06CC\u0631\u0647 \u062A\u0623\u0645\u06CC\u0646',he:'\u05E9\u05D9\u05D1\u05D5\u05E9 \u05D1\u05E1\u05D7\u05E8 \u05D5\u05E9\u05E8\u05E9\u05E8\u05EA \u05D0\u05E1\u05E4\u05E7\u05D4',ur:'\u062A\u062C\u0627\u0631\u062A \u0627\u0648\u0631 \u0633\u067E\u0644\u0627\u0626\u06CC \u0686\u06CC\u0646 \u0645\u06CC\u06BA \u062E\u0644\u0644',af:'Handels- en Voorsieningsketting Ontwrigting'},
+  star_github:        {en:'Star on GitHub',ar:'\u0646\u062C\u0645\u0629 \u0639\u0644\u0649 GitHub',zh:'\u5728 GitHub \u4E0A\u661F\u6807',hi:'GitHub \u092A\u0930 \u0938\u094D\u091F\u093E\u0930 \u0915\u0930\u0947\u0902',es:'Estrella en GitHub',fr:'\u00C9toile sur GitHub',pt:'Estrela no GitHub',ru:'\u0417\u0432\u0435\u0437\u0434\u0430 \u043D\u0430 GitHub',ja:'GitHub\u3067\u30B9\u30BF\u30FC',de:'Stern auf GitHub',ko:'GitHub\uC5D0\uC11C \uC2A4\uD0C0',tr:'GitHub\'da Y\u0131ld\u0131zla',it:'Stella su GitHub',id:'Bintang di GitHub',fa:'\u0633\u062A\u0627\u0631\u0647 \u062F\u0631 GitHub',he:'\u05DB\u05D5\u05DB\u05D1 \u05D1-GitHub',ur:'GitHub \u067E\u0631 \u0633\u0679\u0627\u0631',af:'Ster op GitHub'},
+};
+
+function t(key) {
+  var entry = T[key];
+  if (!entry) return key;
+  return entry[currentLang] || entry.en || key;
+}
+
+function applyLanguage(lang) {
+  currentLang = lang;
+  var langInfo = LANGUAGES.find(function(l){ return l.code === lang; });
+  var dir = (langInfo && langInfo.dir === 'rtl') ? 'rtl' : 'ltr';
+  document.documentElement.setAttribute('dir', dir);
+  document.documentElement.setAttribute('lang', lang);
+
+  // Update all elements with data-i18n attribute
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    el.textContent = t(el.dataset.i18n);
+  });
+
+  // Update nav tabs
+  var tabMap = {dashboard:'tab_dashboard',countries:'tab_countries',channels:'tab_channels',methodology:'tab_methodology',media:'tab_media',pipeline:'tab_pipeline'};
+  document.querySelectorAll('.nav-tab').forEach(function(btn) {
+    var key = tabMap[btn.dataset.tab];
+    if (key) btn.textContent = t(key);
+  });
+
+  // Update KPI labels
+  var kpiLabels = document.querySelectorAll('.kpi-label');
+  var kpiKeys = ['kpi_brent','kpi_gas','kpi_inflation','kpi_hormuz','kpi_supply','kpi_days'];
+  kpiLabels.forEach(function(el, i) { if (kpiKeys[i]) el.textContent = t(kpiKeys[i]); });
+
+  // Update hero
+  document.querySelector('.hero-badge').innerHTML = '<div class="pulse"></div> ' + t('live_tracker');
+  document.querySelector('h1').textContent = t('hero_title');
+  document.querySelector('.hero-sub').textContent = t('hero_sub');
+
+  // Update buttons
+  var ghBtn = document.querySelector('.btn-primary');
+  if (ghBtn) ghBtn.innerHTML = '&#11088; ' + t('star_github');
+  var mediaBtn = document.querySelector('.btn-outline');
+  if (mediaBtn) mediaBtn.innerHTML = '&#128240; ' + t('tab_media');
+
+  // Update trade section title
+  var tradeTitleEl = document.querySelector('#tab-dashboard .section-title');
+  if (tradeTitleEl) tradeTitleEl.textContent = t('sec_trade');
+
+  // Re-render country table with translated headers
+  renderCountryTable();
+
+  // Update language buttons active state
+  document.querySelectorAll('.lang-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.lang === lang);
+  });
+
+  // Persist choice
+  try { localStorage.setItem('wio_lang', lang); } catch(e) {}
+}
+
+// ─── DATA ─────────────────────────────────────────────────────────
+const oilPriceData = [
+  {date:'Feb 27',brent:73,wti:69,event:'Pre-conflict baseline'},
+  {date:'Feb 28',brent:80,wti:76,event:'US-Israel strikes begin'},
+  {date:'Mar 1',brent:82,wti:78},
+  {date:'Mar 4',brent:91,wti:86,event:'Hormuz closure announced'},
+  {date:'Mar 7',brent:98,wti:93},
+  {date:'Mar 8',brent:103,wti:98,event:'Brent crosses $100'},
+  {date:'Mar 10',brent:108,wti:102,event:'Gulf production -6.7M bpd'},
+  {date:'Mar 12',brent:115,wti:108,event:'Production -10M bpd'},
+  {date:'Mar 15',brent:119,wti:112},
+  {date:'Mar 19',brent:126,wti:118,event:'Brent peak $126'},
+  {date:'Mar 23',brent:104,wti:97,event:'Trump 5-day pause'},
+  {date:'Mar 25',brent:109,wti:102},
+  {date:'Mar 30',brent:116,wti:108,event:'US gas hits $4/gal'},
+  {date:'Apr 2',brent:112,wti:105},
+  {date:'Apr 5',brent:113,wti:100,event:'Current'},
+];
+
+const inflationData = {
+  labels:['Jan 26','Feb 26','Mar 26','Apr 26*','May 26*','Jun 26*'],
+  us:[2.4,2.4,3.4,3.8,4.1,4.3],
+  eu:[2.6,2.7,3.8,4.2,4.5,4.7],
+  india:[4.8,4.9,6.2,7.0,7.5,7.8],
+  china:[0.8,0.7,1.8,2.3,2.7,3.0],
+  global:[3.2,3.2,4.0,4.5,4.8,5.0],
+};
+
+// avgIncomePPP = Average annual household income in PPP-adjusted USD (World Bank/IMF 2025 estimates)
+// monthsLost is computed: (householdCost / avgIncomePPP) * 12
+const countryData = [
+  {country:'United States',flag:'\u{1F1FA}\u{1F1F8}',oilDep:37,inflImpact:1.0,gdpHit:-0.8,householdCost:2400,avgIncomePPP:76300,fuelUp:30,foodUp:8,severity:'high',currencyChg:0.0,ffShare:18},
+  {country:'China',flag:'\u{1F1E8}\u{1F1F3}',oilDep:73,inflImpact:1.4,gdpHit:-1.2,householdCost:1100,avgIncomePPP:23400,fuelUp:22,foodUp:12,severity:'high',currencyChg:-2.1,ffShare:36},
+  {country:'India',flag:'\u{1F1EE}\u{1F1F3}',oilDep:85,inflImpact:2.1,gdpHit:-1.8,householdCost:480,avgIncomePPP:9800,fuelUp:35,foodUp:18,severity:'critical',currencyChg:-4.3,ffShare:48},
+  {country:'Japan',flag:'\u{1F1EF}\u{1F1F5}',oilDep:88,inflImpact:1.6,gdpHit:-1.5,householdCost:2100,avgIncomePPP:47900,fuelUp:28,foodUp:10,severity:'high',currencyChg:-3.2,ffShare:22},
+  {country:'Germany',flag:'\u{1F1E9}\u{1F1EA}',oilDep:62,inflImpact:1.8,gdpHit:-1.4,householdCost:2800,avgIncomePPP:63200,fuelUp:32,foodUp:14,severity:'high',currencyChg:-1.5,ffShare:20},
+  {country:'United Kingdom',flag:'\u{1F1EC}\u{1F1E7}',oilDep:44,inflImpact:1.5,gdpHit:-1.1,householdCost:2200,avgIncomePPP:55800,fuelUp:26,foodUp:11,severity:'high',currencyChg:-1.8,ffShare:19},
+  {country:'France',flag:'\u{1F1EB}\u{1F1F7}',oilDep:48,inflImpact:1.3,gdpHit:-1.0,householdCost:2100,avgIncomePPP:56500,fuelUp:24,foodUp:10,severity:'moderate',currencyChg:-1.5,ffShare:21},
+  {country:'Brazil',flag:'\u{1F1E7}\u{1F1F7}',oilDep:28,inflImpact:0.9,gdpHit:-0.5,householdCost:350,avgIncomePPP:18700,fuelUp:18,foodUp:9,severity:'moderate',currencyChg:-2.8,ffShare:35},
+  {country:'Canada',flag:'\u{1F1E8}\u{1F1E6}',oilDep:22,inflImpact:0.7,gdpHit:0.3,householdCost:1800,avgIncomePPP:57400,fuelUp:20,foodUp:7,severity:'low',currencyChg:1.2,ffShare:17},
+  {country:'Australia',flag:'\u{1F1E6}\u{1F1FA}',oilDep:55,inflImpact:1.1,gdpHit:-0.7,householdCost:1900,avgIncomePPP:59400,fuelUp:25,foodUp:8,severity:'moderate',currencyChg:-1.0,ffShare:19},
+  {country:'South Korea',flag:'\u{1F1F0}\u{1F1F7}',oilDep:91,inflImpact:2.0,gdpHit:-1.7,householdCost:1600,avgIncomePPP:50600,fuelUp:30,foodUp:13,severity:'critical',currencyChg:-3.5,ffShare:24},
+  {country:'Italy',flag:'\u{1F1EE}\u{1F1F9}',oilDep:67,inflImpact:1.7,gdpHit:-1.3,householdCost:2300,avgIncomePPP:51100,fuelUp:29,foodUp:12,severity:'high',currencyChg:-1.5,ffShare:23},
+  {country:'Mexico',flag:'\u{1F1F2}\u{1F1FD}',oilDep:35,inflImpact:1.1,gdpHit:-0.6,householdCost:420,avgIncomePPP:22100,fuelUp:20,foodUp:14,severity:'moderate',currencyChg:-3.1,ffShare:38},
+  {country:'Indonesia',flag:'\u{1F1EE}\u{1F1E9}',oilDep:60,inflImpact:1.8,gdpHit:-1.3,householdCost:210,avgIncomePPP:15200,fuelUp:28,foodUp:16,severity:'high',currencyChg:-3.8,ffShare:50},
+  {country:'Turkey',flag:'\u{1F1F9}\u{1F1F7}',oilDep:75,inflImpact:3.2,gdpHit:-2.1,householdCost:380,avgIncomePPP:38400,fuelUp:40,foodUp:22,severity:'critical',currencyChg:-6.2,ffShare:37},
+  {country:'Saudi Arabia',flag:'\u{1F1F8}\u{1F1E6}',oilDep:15,inflImpact:0.8,gdpHit:-3.5,householdCost:600,avgIncomePPP:59100,fuelUp:10,foodUp:20,severity:'critical',currencyChg:0.0,ffShare:25},
+  {country:'Argentina',flag:'\u{1F1E6}\u{1F1F7}',oilDep:30,inflImpact:4.5,gdpHit:-1.5,householdCost:180,avgIncomePPP:27100,fuelUp:35,foodUp:25,severity:'high',currencyChg:-8.5,ffShare:40},
+  {country:'South Africa',flag:'\u{1F1FF}\u{1F1E6}',oilDep:68,inflImpact:2.0,gdpHit:-1.2,householdCost:290,avgIncomePPP:16000,fuelUp:32,foodUp:18,severity:'high',currencyChg:-4.1,ffShare:42},
+  {country:'Russia',flag:'\u{1F1F7}\u{1F1FA}',oilDep:18,inflImpact:0.6,gdpHit:0.8,householdCost:150,avgIncomePPP:36400,fuelUp:8,foodUp:6,severity:'low',currencyChg:2.5,ffShare:33},
+  {country:'European Union',flag:'\u{1F1EA}\u{1F1FA}',oilDep:58,inflImpact:1.6,gdpHit:-1.2,householdCost:2200,avgIncomePPP:50500,fuelUp:28,foodUp:12,severity:'high',currencyChg:-1.5,ffShare:22},
+  // ── Direct conflict participants ──
+  {country:'Iran',flag:'\u{1F1EE}\u{1F1F7}',oilDep:5,inflImpact:18.0,gdpHit:-12.5,householdCost:3200,avgIncomePPP:16800,fuelUp:85,foodUp:60,severity:'critical',currencyChg:-45.0,participant:true,ffShare:55},
+  {country:'Israel',flag:'\u{1F1EE}\u{1F1F1}',oilDep:95,inflImpact:3.8,gdpHit:-4.2,householdCost:4500,avgIncomePPP:46800,fuelUp:38,foodUp:15,severity:'critical',currencyChg:-8.0,participant:true,ffShare:22},
+  {country:'Iraq',flag:'\u{1F1EE}\u{1F1F6}',oilDep:5,inflImpact:8.5,gdpHit:-9.0,householdCost:900,avgIncomePPP:12500,fuelUp:55,foodUp:45,severity:'critical',currencyChg:-12.0,participant:true,ffShare:52},
+  {country:'Qatar',flag:'\u{1F1F6}\u{1F1E6}',oilDep:3,inflImpact:2.5,gdpHit:-8.0,householdCost:2800,avgIncomePPP:112800,fuelUp:12,foodUp:25,severity:'critical',currencyChg:-0.5,participant:true,ffShare:20},
+  {country:'Kuwait',flag:'\u{1F1F0}\u{1F1FC}',oilDep:5,inflImpact:3.0,gdpHit:-7.5,householdCost:2200,avgIncomePPP:52900,fuelUp:15,foodUp:28,severity:'critical',currencyChg:-1.2,participant:true,ffShare:24},
+  {country:'UAE',flag:'\u{1F1E6}\u{1F1EA}',oilDep:5,inflImpact:2.2,gdpHit:-5.5,householdCost:2600,avgIncomePPP:78600,fuelUp:10,foodUp:22,severity:'critical',currencyChg:-0.3,participant:true,ffShare:19},
+  {country:'Lebanon',flag:'\u{1F1F1}\u{1F1E7}',oilDep:100,inflImpact:12.0,gdpHit:-6.0,householdCost:1400,avgIncomePPP:14200,fuelUp:90,foodUp:55,severity:'critical',currencyChg:-18.0,participant:true,ffShare:58},
+  {country:'Syria',flag:'\u{1F1F8}\u{1F1FE}',oilDep:80,inflImpact:15.0,gdpHit:-8.0,householdCost:350,avgIncomePPP:3600,fuelUp:95,foodUp:65,severity:'critical',currencyChg:-22.0,participant:true,ffShare:65},
+  {country:'Yemen',flag:'\u{1F1FE}\u{1F1EA}',oilDep:100,inflImpact:10.0,gdpHit:-5.0,householdCost:120,avgIncomePPP:1800,fuelUp:80,foodUp:50,severity:'critical',currencyChg:-15.0,participant:true,ffShare:62},
+];
+// Pre-compute derived metrics
+countryData.forEach(function(c) {
+  c.monthsLost = Math.round((c.householdCost / c.avgIncomePPP) * 12 * 10) / 10;
+  // Purchasing power erosion: % of real purchasing power lost due to war-driven inflation
+  // Formula: inflImpact / (100 + baselineInflation + inflImpact) * 100, approximated with 3% baseline
+  c.ppErosion = Math.round(c.inflImpact / (100 + 3 + c.inflImpact) * 100 * 10) / 10;
+  // Food & fuel budget share shift: pre-conflict vs post-conflict
+  // Post-conflict share rises because food+fuel prices go up more than overall prices
+  // Weighted price increase for food+fuel portion of budget
+  var foodWeight = 0.6; // food is ~60% of the food+fuel share
+  var fuelWeight = 0.4; // fuel is ~40%
+  var ffPriceIncrease = (foodWeight * c.foodUp + fuelWeight * c.fuelUp) / 100;
+  var overallInflation = c.inflImpact / 100;
+  c.ffSharePost = Math.round(c.ffShare * (1 + ffPriceIncrease) / (1 + overallInflation) * 10) / 10;
+  c.ffShift = Math.round((c.ffSharePost - c.ffShare) * 10) / 10;
+});
+
+const impactChannels = [
+  {icon:'\u26FD',color:'var(--red)',bg:'var(--red-dim)',title:'Energy & Fuel Prices',desc:'Brent crude surged from $73 to $126/barrel. US gasoline hit $4/gallon (+30%). Strait of Hormuz closure removed 20% of global oil supply. Largest supply disruption in history per IEA.',ml:'Peak Brent price',mv:'$126/bbl'},
+  {icon:'\u{1F33E}',color:'var(--orange)',bg:'var(--orange-dim)',title:'Food & Fertilizer',desc:'30% of global urea exports transit Hormuz. China restricted fertilizer exports. Food prices rising in import-dependent nations. Wheat, rice, and dairy costs climbing across Asia and Africa.',ml:'Fertilizer disruption',mv:'30%'},
+  {icon:'\u{1F4C9}',color:'var(--yellow)',bg:'var(--yellow-dim)',title:'GDP & Growth',desc:'Oxford Economics: prolonged conflict could tip global recession. Global growth revised down from 2.9% to 2.6%. Germany and Italy face technical recession risk by Q4 2026. ECB warns of stagflation.',ml:'Global GDP impact',mv:'-0.3pp'},
+  {icon:'\u{1F4B1}',color:'var(--purple)',bg:'var(--purple-dim)',title:'Currencies & Capital Flows',desc:'Emerging market currencies weakening sharply. Indian rupee, Turkish lira, South African rand under pressure. Flight to USD and gold. Central banks may be forced to hike rates despite slowing growth.',ml:'INR depreciation',mv:'-4.3%'},
+  {icon:'\u{1F6A2}',color:'var(--blue)',bg:'var(--blue-dim)',title:'Trade & Supply Chains',desc:'Hormuz transits collapsed 95% (130 to 6/day). Global merchandise trade growth halved. Shipping insurance premiums up 400%. Plastics and petrochemical chains disrupted globally.',ml:'Shipping collapse',mv:'-95%'},
+  {icon:'\u{1F3E0}',color:'var(--green)',bg:'var(--green-dim)',title:'Household Welfare',desc:'Average US household facing ~$2,400/yr extra cost. Indian households ~$480/yr (much larger relative to income). Energy poverty risk rising in South Asia and Sub-Saharan Africa.',ml:'US household cost',mv:'$2,400/yr'},
+];
+
+const methodCritique = [
+  {title:'Data Sources \u2014 Critical Evaluation',items:['Oil prices: EIA, ICE Brent, NYMEX WTI \u2014 highly reliable, real-time','Inflation: IMF WEO, OECD, national statistics \u2014 reliable but lagged 2-4 weeks','Trade: UNCTAD, WTO \u2014 reliable but quarterly granularity limits real-time tracking','Household cost: Modeled from IMF pass-through coefficients \u2014 transparent but approximate','GDP: Oxford Economics, IMF nowcasts \u2014 scenario-dependent, high uncertainty bands'],note:'Key gap: Real-time household-level microdata is scarce. We rely on macro pass-through models which may under/overestimate distributional impacts.'},
+  {title:'Representation Choices \u2014 Tradeoffs',items:['Time-series for oil: Best for showing volatility and event correlation','Heatmap/table for countries: Enables cross-country comparison at a glance','Bar charts for household cost: Makes abstract $ figures tangible and comparable','Radar for vulnerability profile: Shows multi-dimensional risk but can mislead on scale','Avoided: Single aggregated "cost of war" number \u2014 too reductive and politically charged'],note:'Design principle: Modular channels > single headline number. Lets users weight what matters to them.'},
+  {title:'Methodological Limitations',items:['Household estimates use PPP-adjusted averages \u2014 masks inequality within countries','GDP forecasts assume current intensity persists \u2014 ceasefire would change trajectory','Currency impacts are spot rates \u2014 forward curves may diverge significantly','Food price transmission varies by subsidy regime (India, Indonesia heavily subsidize)','Second-order financial contagion (bank exposure, derivatives) not yet modeled'],note:'Open call: We welcome contributions modeling financial contagion, subnational impacts, and real-time price scraping.'},
+];
+
+const pipelineInfo = [
+  {title:'Daily Automated Pipeline',items:['Fetch Brent/WTI prices from EIA API (free, API key needed)','Fetch exchange rates from ECB SDMX API (free, open)','Fetch commodity indices from World Bank Commodity API','Pull inflation nowcast from FRED API (free with key)','Run Python pipeline: validate \u2192 transform \u2192 merge \u2192 compute household costs','Regenerate dashboard JSON data files','Commit updated data + rebuild static site via GitHub Pages','Post summary to Twitter/X via API (optional)']},
+  {title:'Data APIs Used (All Free/Open)',items:['EIA Open Data API \u2014 oil prices (real-time, daily)','FRED (St. Louis Fed) \u2014 CPI, gas prices, breakevens','ECB Statistical Data Warehouse \u2014 EUR exchange rates','World Bank Commodity Prices \u2014 monthly pink sheets','IMF WEO API \u2014 GDP, inflation forecasts (semiannual)','UNCTAD SDMX \u2014 trade flow data (quarterly)','MarineTraffic / UN COMTRADE \u2014 shipping volume (limited free tier)']},
+  {title:'Open-Source Project Structure',items:['data/raw/ \u2014 Raw API responses, timestamped','data/processed/ \u2014 Cleaned, merged datasets (CSV + JSON)','pipeline/ \u2014 Python scripts for fetch, transform, compute','dashboard/ \u2014 This SPA (builds to static HTML)','docs/methodology.md \u2014 Full methodology documentation','CONTRIBUTING.md \u2014 How to contribute data, code, or analysis','.github/workflows/daily-update.yml \u2014 CI/CD pipeline','License: CC BY 4.0 (data) + MIT (code)']},
+];
+
+const broadcastStrategies = [
+  {title:'GitHub Open Source',desc:'Public repo with CC BY 4.0 data license + MIT code license. README with methodology, live badges showing latest oil price and update timestamp. Star count as credibility signal. Discussions enabled for community feedback.',color:'var(--purple)'},
+  {title:'Wire Service / Newsroom',desc:'Pre-formatted press snippet with key figures, attribution line, and contact. Pitch template for Reuters, AP, AFP. Offer embeddable iframes of individual charts for editorial use. Weekly PDF briefing for editors.',color:'var(--blue)'},
+  {title:'Social Media',desc:'Daily auto-generated chart cards (PNG) optimized for Twitter/X, LinkedIn, Instagram. Thread templates with 8-10 data points. Hashtag strategy: #WarImpactObservatory #IranWar. Tag relevant journalists and economists.',color:'var(--green)'},
+  {title:'Academic & Policy',desc:'Working paper on SSRN/arXiv with full methodology. Outreach to Chatham House, Brookings, CFR, OECD. Data available in research-friendly formats (CSV, Parquet). DOI via Zenodo for citability.',color:'var(--orange)'},
+  {title:'Newsletter & RSS',desc:'Weekly digest email via Substack or Buttondown (free tier). RSS feed of daily data updates. Embed signup on dashboard. Partner with existing econ newsletters for cross-promotion.',color:'var(--yellow)'},
+  {title:'Embeddable Widgets',desc:'Provide iframe embed codes for each chart. Newsrooms and bloggers can embed live-updating charts directly. No API key needed. Lightweight, responsive, and branded with attribution.',color:'var(--red)'},
+];
+
+const pressSnippetText = `FOR IMMEDIATE USE \u2014 War Impact Observatory
+Updated: April 5, 2026 | Source: warimpactobservatory.org (CC BY 4.0)
+
+HEADLINE: Iran Conflict Drives Largest Oil Supply Disruption in History;
+Households Worldwide Face $480\u2013$2,800 in Annual Extra Costs
+
+KEY FIGURES:
+\u2022 Brent crude: $113/barrel (+55% since Feb 27)
+\u2022 Strait of Hormuz transits: down 95% (130 \u2192 6 ships/day)
+\u2022 Global oil supply loss: 10+ million barrels/day (largest ever, per IEA)
+\u2022 US gasoline: $4.00/gallon (+30%)
+\u2022 Global inflation forecast: 4.0% (OECD), up from 3.2% pre-conflict
+\u2022 Most vulnerable: Turkey (+3.2pp inflation), India (+2.1pp), S. Korea (+2.0pp)
+
+HOUSEHOLD IMPACT (estimated additional annual cost):
+\u2022 Germany: $2,800 | US: $2,400 | Italy: $2,300 | UK: $2,200
+\u2022 Japan: $2,100 | Australia: $1,900 | South Korea: $1,600
+\u2022 India: $480 | Turkey: $380 | Brazil: $350 | Indonesia: $210
+
+SECOND-ORDER EFFECTS:
+\u2022 30% of global fertilizer exports disrupted \u2192 food price acceleration
+\u2022 ECB warns of stagflation; Germany & Italy face technical recession risk
+\u2022 Emerging market currencies weakening (TRY -6.2%, INR -4.3%, ZAR -4.1%)
+\u2022 China restricted fertilizer exports to protect domestic food supply
+\u2022 Global trade growth forecast halved: 4.7% \u2192 1.5\u20132.5%
+
+METHODOLOGY: Modular, open-source framework using IMF, World Bank, EIA,
+UNCTAD, and Oxford Economics data. Household costs derived from IMF
+oil-price pass-through coefficients. All data and code available on GitHub.
+
+CONTACT: warimpactobservatory@protonmail.com
+GITHUB: github.com/war-impact-observatory/tracker
+LICENSE: Creative Commons Attribution 4.0 International`;
+
+const twitterThreadText = `\u{1F9F5} THREAD: The economic cost of the Iran war \u2014 by the numbers
+
+1/ Oil prices have surged 55% since Feb 28. Brent crude hit $126/barrel at peak. This is the LARGEST oil supply disruption in history, per the IEA. Here's what it means for your wallet \u{1F447}
+
+2/ \u{1F1FA}\u{1F1F8} US: Gas prices hit $4/gallon (+30%). Average household facing ~$2,400/yr in extra costs. Inflation jumped from 2.4% \u2192 3.4% in one month.
+
+3/ \u{1F1EE}\u{1F1F3} India: Most vulnerable major economy. 85% oil import dependent. Inflation +2.1pp. Rupee down 4.3%. Households face $480/yr extra \u2014 devastating at Indian income levels.
+
+4/ \u{1F1E9}\u{1F1EA} Germany: \u20AC2,800/yr extra per household. ECB warns of stagflation. Technical recession risk by Q4. Energy-intensive industry under acute stress.
+
+5/ \u{1F1F9}\u{1F1F7} Turkey: Worst inflation impact at +3.2pp. Lira down 6.2%. Already fragile economy faces compounding crisis.
+
+6/ The Strait of Hormuz \u2014 carrying 20% of global oil \u2014 went from 130 ship transits/day to just 6. That's a 95% collapse. Nothing like this has happened before.
+
+7/ Beyond oil: 30% of global fertilizer transits Hormuz. Food prices are rising. China restricted fertilizer exports. This hits the poorest hardest.
+
+8/ Full interactive dashboard, methodology, and daily updates: warimpactobservatory.org
+
+All data is open-source (CC BY 4.0). Contribute: github.com/war-impact-observatory
+
+#WarImpactObservatory #IranWar #OilPrices #Inflation`;
+
+// ─── TAB NAVIGATION ───────────────────────────────────────────────
+function switchTab(tabId) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tabId).classList.add('active');
+  document.querySelector('[data-tab="' + tabId + '"]').classList.add('active');
+}
+document.getElementById('navTabs').addEventListener('click', function(e) {
+  if (e.target.classList.contains('nav-tab')) {
+    switchTab(e.target.dataset.tab);
+  }
+});
+
+// ─── CHARTS (Chart.js) ───────────────────────────────────────────
+Chart.defaults.color = '#8888aa';
+Chart.defaults.borderColor = '#2a2a4a';
+Chart.defaults.font.family = "'Inter', sans-serif";
+
+// Oil Price Chart
+new Chart(document.getElementById('oilChart'), {
+  type: 'line',
+  data: {
+    labels: oilPriceData.map(d => d.date),
+    datasets: [
+      {
+        label: 'Brent Crude',
+        data: oilPriceData.map(d => d.brent),
+        borderColor: '#ff4757',
+        backgroundColor: 'rgba(255,71,87,0.15)',
+        fill: true,
+        tension: 0.3,
+        borderWidth: 3,
+        pointRadius: 4,
+        pointBackgroundColor: '#ff4757',
+      },
+      {
+        label: 'WTI',
+        data: oilPriceData.map(d => d.wti),
+        borderColor: '#ff8c42',
+        backgroundColor: 'rgba(255,140,66,0.08)',
+        fill: true,
+        tension: 0.3,
+        borderWidth: 2,
+        pointRadius: 3,
+        pointBackgroundColor: '#ff8c42',
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      tooltip: {
+        backgroundColor: '#1a1a2e',
+        borderColor: '#2a2a4a',
+        borderWidth: 1,
+        titleFont: { weight: '600' },
+        callbacks: {
+          label: function(ctx) { return ctx.dataset.label + ': $' + ctx.parsed.y + '/bbl'; },
+          afterBody: function(tooltipItems) {
+            var idx = tooltipItems[0].dataIndex;
+            var ev = oilPriceData[idx].event;
+            return ev ? ['\n\u26A0 ' + ev] : [];
+          }
+        }
+      },
+      legend: { labels: { usePointStyle: true, padding: 20 } }
+    },
+    scales: {
+      y: {
+        min: 60, max: 140,
+        ticks: { callback: function(v) { return '$' + v; } },
+        grid: { color: '#1e1e35' }
+      },
+      x: { grid: { color: '#1e1e35' } }
+    }
+  }
+});
+
+// Inflation Chart
+new Chart(document.getElementById('inflChart'), {
+  type: 'line',
+  data: {
+    labels: inflationData.labels,
+    datasets: [
+      { label: 'Global', data: inflationData.global, borderColor: '#ff4757', borderWidth: 2.5, borderDash: [6,3], pointRadius: 3, tension: 0.3, fill: false },
+      { label: 'United States', data: inflationData.us, borderColor: '#4ea8de', borderWidth: 2, pointRadius: 3, tension: 0.3, fill: false },
+      { label: 'EU', data: inflationData.eu, borderColor: '#9b5de5', borderWidth: 2, pointRadius: 3, tension: 0.3, fill: false },
+      { label: 'India', data: inflationData.india, borderColor: '#ff8c42', borderWidth: 2, pointRadius: 3, tension: 0.3, fill: false },
+      { label: 'China', data: inflationData.china, borderColor: '#06d6a0', borderWidth: 2, pointRadius: 3, tension: 0.3, fill: false },
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      tooltip: { backgroundColor: '#1a1a2e', borderColor: '#2a2a4a', borderWidth: 1 },
+      legend: { labels: { usePointStyle: true, padding: 16, font: { size: 12 } } }
+    },
+    scales: {
+      y: { ticks: { callback: function(v) { return v + '%'; } }, grid: { color: '#1e1e35' } },
+      x: { grid: { color: '#1e1e35' } }
+    }
+  }
+});
+
+// Household Cost Chart (horizontal bar)
+var hhSorted = countryData.filter(c => c.country !== 'European Union').sort((a, b) => a.householdCost - b.householdCost).slice(-12);
+new Chart(document.getElementById('hhChart'), {
+  type: 'bar',
+  data: {
+    labels: hhSorted.map(c => c.country),
+    datasets: [{
+      label: 'Annual Cost (USD)',
+      data: hhSorted.map(c => c.householdCost),
+      backgroundColor: hhSorted.map(c => c.severity === 'critical' ? '#ff4757' : c.severity === 'high' ? '#ff8c42' : '#ffd166'),
+      borderRadius: 4,
+      barThickness: 18,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      tooltip: {
+        backgroundColor: '#1a1a2e', borderColor: '#2a2a4a', borderWidth: 1,
+        callbacks: { label: function(ctx) { return '$' + ctx.parsed.x.toLocaleString() + '/yr'; } }
+      },
+      legend: { display: false }
+    },
+    scales: {
+      x: { ticks: { callback: function(v) { return '$' + v.toLocaleString(); } }, grid: { color: '#1e1e35' } },
+      y: { grid: { display: false }, ticks: { font: { size: 12 } } }
+    }
+  }
+});
+
+// ─── COUNTRY TABLE ────────────────────────────────────────────────
+var currentSort = 'severity';
+var sortDir = 1;
+var sevOrder = { critical: 0, high: 1, moderate: 2, low: 3 };
+
+function renderCountryTable() {
+  var sorted = countryData.slice().sort(function(a, b) {
+    if (currentSort === 'country') return sortDir * a.country.localeCompare(b.country);
+    if (currentSort === 'severity') return sortDir * (sevOrder[a.severity] - sevOrder[b.severity]);
+    return sortDir * (b[currentSort] - a[currentSort]);
+  });
+  var maxInfl = Math.max.apply(null, countryData.map(function(c){ return c.inflImpact; }));
+  var maxHH = Math.max.apply(null, countryData.map(function(c){ return c.householdCost; }));
+  var maxPP = Math.max.apply(null, countryData.map(function(c){ return c.ppErosion; }));
+  var maxShift = Math.max.apply(null, countryData.map(function(c){ return c.ffShift; }));
+  var html = '';
+  sorted.forEach(function(c) {
+    var inflW = Math.min(c.inflImpact / maxInfl * 80, 80);
+    var inflColor = c.inflImpact > 2 ? 'var(--red)' : c.inflImpact > 1.2 ? 'var(--orange)' : 'var(--yellow)';
+    var hhW = Math.min(c.householdCost / maxHH * 80, 80);
+    var gdpColor = c.gdpHit > 0 ? 'var(--green)' : 'var(--red)';
+    var curColor = c.currencyChg > 0 ? 'var(--green)' : 'var(--red)';
+    var ppW = Math.min(c.ppErosion / maxPP * 60, 60);
+    var ppColor = c.ppErosion > 5 ? 'var(--red)' : c.ppErosion > 2 ? 'var(--orange)' : 'var(--yellow)';
+    var shiftW = Math.min(c.ffShift / maxShift * 60, 60);
+    var shiftColor = c.ffShift > 5 ? 'var(--red)' : c.ffShift > 2 ? 'var(--orange)' : 'var(--yellow)';
+    html += '<tr>' +
+      '<td><span class="flag">' + c.flag + '</span><strong>' + c.country + '</strong></td>' +
+      '<td><span class="sev sev-' + c.severity + '">' + c.severity + '</span></td>' +
+      '<td><div class="bar-cell"><div class="bar" style="width:' + inflW + 'px;background:' + inflColor + '"></div><span class="mono">+' + c.inflImpact.toFixed(1) + 'pp</span></div></td>' +
+      '<td class="mono" style="color:' + gdpColor + '">' + (c.gdpHit > 0 ? '+' : '') + c.gdpHit.toFixed(1) + '%</td>' +
+      '<td><div class="bar-cell"><div class="bar" style="width:' + hhW + 'px;background:var(--orange)"></div><span class="mono">$' + c.householdCost.toLocaleString() + '</span></div></td>' +
+      '<td><div class="bar-cell"><div class="bar" style="width:' + ppW + 'px;background:' + ppColor + '"></div><span class="mono" style="color:' + ppColor + ';font-weight:600">-' + c.ppErosion.toFixed(1) + '%</span></div></td>' +
+      '<td><div class="bar-cell" title="' + c.ffShare + '% → ' + c.ffSharePost + '%"><div class="bar" style="width:' + shiftW + 'px;background:' + shiftColor + '"></div><span class="mono" style="color:' + shiftColor + ';font-weight:600">+' + c.ffShift.toFixed(1) + 'pp</span></div></td>' +
+      '<td class="mono" style="color:var(--red)">+' + c.fuelUp + '%</td>' +
+      '<td class="mono" style="color:var(--orange)">+' + c.foodUp + '%</td>' +
+      '<td class="mono" style="color:' + curColor + '">' + (c.currencyChg > 0 ? '+' : '') + c.currencyChg.toFixed(1) + '%</td>' +
+      '</tr>';
+  });
+  document.getElementById('countryBody').innerHTML = html;
+}
+renderCountryTable();
+
+document.getElementById('countryTable').querySelector('thead').addEventListener('click', function(e) {
+  var th = e.target.closest('th');
+  if (!th || !th.dataset.sort) return;
+  if (currentSort === th.dataset.sort) { sortDir *= -1; } else { currentSort = th.dataset.sort; sortDir = 1; }
+  renderCountryTable();
+});
+
+// ─── IMPACT CHANNELS ──────────────────────────────────────────────
+document.getElementById('channelGrid').innerHTML = impactChannels.map(function(ch) {
+  return '<div class="ch-card">' +
+    '<div class="ch-icon" style="background:' + ch.bg + '">' + ch.icon + '</div>' +
+    '<h3>' + ch.title + '</h3><p>' + ch.desc + '</p>' +
+    '<div class="ch-metric"><span class="ch-metric-lbl">' + ch.ml + '</span><span class="ch-metric-val" style="color:' + ch.color + '">' + ch.mv + '</span></div>' +
+    '</div>';
+}).join('');
+
+// ─── METHODOLOGY ──────────────────────────────────────────────────
+document.getElementById('methodGrid').innerHTML = methodCritique.map(function(m) {
+  return '<div class="method-card"><h3>' + m.title + '</h3>' +
+    '<ul>' + m.items.map(function(i){ return '<li>' + i + '</li>'; }).join('') + '</ul>' +
+    '<p class="warn">\u26A0 ' + m.note + '</p></div>';
+}).join('');
+
+// ─── MEDIA KIT ────────────────────────────────────────────────────
+document.getElementById('pressSnippet').textContent = pressSnippetText;
+document.getElementById('twitterThread').textContent = twitterThreadText;
+
+// ─── PIPELINE ─────────────────────────────────────────────────────
+document.getElementById('pipelineGrid').innerHTML = pipelineInfo.map(function(p) {
+  return '<div class="method-card"><h3>' + p.title + '</h3>' +
+    '<ul>' + p.items.map(function(i){ return '<li>' + i + '</li>'; }).join('') + '</ul></div>';
+}).join('');
+
+// ─── ADD COUNTRY FORM ─────────────────────────────────────────────
+function submitCountry(e) {
+  e.preventDefault();
+  var name = document.getElementById('countryInput').value.trim();
+  var reason = document.getElementById('countryReason').value.trim();
+  var title = encodeURIComponent('Add country: ' + name);
+  var body = encodeURIComponent(
+    '## Country Request\n\n' +
+    '**Country:** ' + name + '\n\n' +
+    '**Reason:** ' + (reason || 'No reason provided') + '\n\n' +
+    '---\n_Submitted via War Impact Observatory dashboard_'
+  );
+  var url = 'https://github.com/war-impact-observatory/tracker/issues/new?title=' + title + '&body=' + body + '&labels=add-country';
+  window.open(url, '_blank');
+  document.getElementById('addCountryModal').style.display = 'none';
+  document.getElementById('addCountryForm').reset();
+}
+
+// Close modal on backdrop click
+document.getElementById('addCountryModal').addEventListener('click', function(e) {
+  if (e.target === this) this.style.display = 'none';
+});
+
+// ─── LANGUAGE BAR SETUP ───────────────────────────────────────────
+(function() {
+  var container = document.getElementById('langButtons');
+  container.style.cssText = 'display:flex;gap:4px;flex-wrap:nowrap';
+  LANGUAGES.forEach(function(lang) {
+    var btn = document.createElement('button');
+    btn.className = 'lang-btn' + (lang.code === 'en' ? ' active' : '');
+    btn.dataset.lang = lang.code;
+    btn.innerHTML = '<span class="lang-flag">' + lang.flag + '</span>' + lang.name;
+    btn.onclick = function() { applyLanguage(lang.code); };
+    container.appendChild(btn);
+  });
+  // Restore saved language or detect from browser
+  var saved = null;
+  try { saved = localStorage.getItem('wio_lang'); } catch(e) {}
+  if (saved && LANGUAGES.some(function(l){ return l.code === saved; })) {
+    applyLanguage(saved);
+  } else {
+    var browserLang = (navigator.language || '').split('-')[0];
+    if (browserLang !== 'en' && LANGUAGES.some(function(l){ return l.code === browserLang; })) {
+      applyLanguage(browserLang);
+    }
+  }
+})();
+
+</script>
+</body>
+</html>

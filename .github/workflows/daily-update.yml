@@ -1,0 +1,100 @@
+name: Daily Data Update
+
+on:
+  schedule:
+    # Run every day at 06:00 UTC (after Asian and European markets open)
+    - cron: '0 6 * * *'
+  workflow_dispatch: # Allow manual triggers
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+env:
+  EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
+  FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r pipeline/requirements.txt
+
+      - name: Fetch oil prices (EIA)
+        run: python pipeline/fetch_oil_prices.py
+        continue-on-error: true
+
+      - name: Fetch exchange rates (ECB)
+        run: python pipeline/fetch_exchange_rates.py
+        continue-on-error: true
+
+      - name: Fetch FRED data (CPI, gas prices)
+        run: python pipeline/fetch_fred_data.py
+        continue-on-error: true
+
+      - name: Compute household costs
+        run: python pipeline/compute_household_costs.py
+
+      - name: Merge and validate all data
+        run: python pipeline/merge_and_validate.py
+
+      - name: Generate dashboard data JSON
+        run: python pipeline/generate_dashboard_json.py
+
+      - name: Generate chart card PNGs for social media
+        run: python pipeline/generate_chart_cards.py
+        continue-on-error: true
+
+      - name: Commit updated data
+        run: |
+          git config user.name "War Impact Observatory Bot"
+          git config user.email "bot@warimpactobservatory.org"
+          git add data/ media/chart_cards/
+          git diff --staged --quiet || git commit -m "data: daily update $(date -u +%Y-%m-%d)"
+          git push
+
+      - name: Update changelog
+        run: |
+          echo "## $(date -u +%Y-%m-%d)" >> docs/changelog.md
+          echo "- Oil prices: $(cat data/processed/latest_brent.txt)" >> docs/changelog.md
+          echo "- Pipeline run: success" >> docs/changelog.md
+          echo "" >> docs/changelog.md
+          git add docs/changelog.md
+          git diff --staged --quiet || git commit -m "docs: update changelog $(date -u +%Y-%m-%d)"
+          git push
+
+  deploy:
+    needs: update-data
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main  # Get the latest commit with updated data
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
+          publish_branch: gh-pages
+
+  notify:
+    needs: [update-data, deploy]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Send summary notification
+        run: |
+          echo "Daily update completed at $(date -u)"
+          echo "Status: update-data=${{ needs.update-data.result }}, deploy=${{ needs.deploy.result }}"

@@ -1,1 +1,6 @@
-{"brent_usd":126.0,"date":"2026-04-06","source":"SEED","fetched_at":"2026-04-07T06:00:00Z"}
+{
+  "brent_usd": 121.88,
+  "date": "2026-03-30",
+  "source": "EIA/RBRTE",
+  "fetched_at": "2026-04-06T23:21:28.389574Z"
+}

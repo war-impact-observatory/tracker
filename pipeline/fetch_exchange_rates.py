@@ -1,64 +1,98 @@
 """
-Fetch daily exchange rates from the ECB Statistical Data Warehouse (SDMX API).
-https://sdw-wsrest.ecb.europa.eu/
+Fetch daily exchange rates from the ECB (European Central Bank).
+Uses the free daily XML reference rate feed — no API key required.
+https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml
 
-No API key required. Free and open.
-Output: data/raw/ecb/exchange_rates_{date}.json
+All rates are quoted as: 1 EUR = N local currency units.
+Output: data/raw/exchange_rates.json
 """
 
 import json
+import xml.etree.ElementTree as ET
 import requests
 from datetime import datetime
 from pathlib import Path
 
-BASE_URL = "https://sdw-wsrest.ecb.europa.eu/service"
-
-# Key currencies to track (vs EUR)
-CURRENCIES = ["USD", "GBP", "JPY", "CNY", "INR", "TRY", "ZAR", "BRL", "KRW", "IDR", "MXN", "AUD", "CAD", "SAR", "RUB", "ARS"]
-
-OUTPUT_DIR = Path("data/raw/ecb")
-PROCESSED_DIR = Path("data/processed")
+ECB_XML_URL  = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
+OUTPUT_DIR   = Path("data/raw")
 
 
-def fetch_ecb_rates(start_date: str, end_date: str) -> dict:
-    """Fetch exchange rates from ECB SDMX API."""
-    currency_str = "+".join(CURRENCIES)
-    url = f"{BASE_URL}/data/EXR/D.{currency_str}.EUR.SP00.A"
-    params = {
-        "startPeriod": start_date,
-        "endPeriod": end_date,
-        "format": "jsondata",
-    }
-    headers = {"Accept": "application/json"}
-    resp = requests.get(url, params=params, headers=headers, timeout=30)
+def fetch_ecb_rates() -> dict | None:
+    """
+    Parse ECB daily XML and return a dict:
+      { "date": "2026-04-04", "eur_usd": 1.092, "rates": {"USD": 1.092, "INR": 93.2, ...} }
+    """
+    headers = {"User-Agent": "WarImpactObservatory/1.0 (sumitb1808@gmail.com)"}
+    resp = requests.get(ECB_XML_URL, headers=headers, timeout=20)
     resp.raise_for_status()
-    return resp.json()
+
+    ns = {
+        "gesmes": "http://www.gesmes.org/xml/2002-08-01",
+        "ecb":    "http://www.ecb.int/vocabulary/2002-08-01/eurofxref",
+    }
+    root = ET.fromstring(resp.content)
+
+    # Find the <Cube time="..."> element
+    cube_time = root.find(".//ecb:Cube[@time]", ns)
+    if cube_time is None:
+        return None
+
+    rate_date = cube_time.attrib.get("time", datetime.utcnow().strftime("%Y-%m-%d"))
+    rates = {}
+    for cube in cube_time.findall("ecb:Cube", ns):
+        currency = cube.attrib.get("currency")
+        rate_str = cube.attrib.get("rate")
+        if currency and rate_str:
+            try:
+                rates[currency] = float(rate_str)
+            except ValueError:
+                pass
+
+    eur_usd = rates.get("USD", 1.085)
+    return {
+        "date":       rate_date,
+        "eur_usd":    eur_usd,
+        "rates":      rates,
+        "fetched_at": datetime.utcnow().isoformat() + "Z",
+        "source":     "ECB/eurofxref-daily",
+    }
 
 
 def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 
-    today = datetime.utcnow().strftime("%Y-%m-%d")
-    start = "2026-02-01"
-
-    print(f"Fetching ECB exchange rates from {start} to {today}...")
-
+    print("Fetching ECB exchange rates...")
     try:
-        data = fetch_ecb_rates(start, today)
-
-        # Save raw response
-        raw_file = OUTPUT_DIR / f"exchange_rates_{today}.json"
-        with open(raw_file, "w") as f:
-            json.dump({"fetched_at": today, "data": data}, f, indent=2)
-        print(f"Saved raw data to {raw_file}")
-
-        # Process into CSV (simplified — real implementation would parse SDMX structure)
-        print("Exchange rate data fetched successfully.")
-
-    except requests.RequestException as e:
-        print(f"ERROR fetching exchange rates: {e}")
-        raise
+        result = fetch_ecb_rates()
+        if result:
+            out = OUTPUT_DIR / "exchange_rates.json"
+            with open(out, "w") as f:
+                json.dump(result, f, indent=2)
+            print(f"  Rates for {result['date']}: {len(result['rates'])} currencies fetched")
+            print(f"  EUR/USD = {result['eur_usd']}")
+        else:
+            print("  WARNING: Failed to parse ECB XML — saving empty fallback")
+            fallback = {
+                "date":       datetime.utcnow().strftime("%Y-%m-%d"),
+                "eur_usd":    1.085,
+                "rates":      {},
+                "fetched_at": datetime.utcnow().isoformat() + "Z",
+                "source":     "FALLBACK",
+            }
+            with open(OUTPUT_DIR / "exchange_rates.json", "w") as f:
+                json.dump(fallback, f, indent=2)
+    except Exception as e:
+        print(f"  ERROR: {e}")
+        fallback = {
+            "date":       datetime.utcnow().strftime("%Y-%m-%d"),
+            "eur_usd":    1.085,
+            "rates":      {},
+            "fetched_at": datetime.utcnow().isoformat() + "Z",
+            "source":     "FALLBACK",
+        }
+        out = OUTPUT_DIR / "exchange_rates.json"
+        with open(out, "w") as f:
+            json.dump(fallback, f, indent=2)
 
 
 if __name__ == "__main__":

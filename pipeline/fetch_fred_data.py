@@ -2,8 +2,11 @@
 Fetch US economic indicators from FRED (Federal Reserve Economic Data).
 https://fred.stlouisfed.org/
 
-Requires: FRED_API_KEY environment variable (free at https://fred.stlouisfed.org/docs/api/api_key.html)
-Output: data/raw/fred/fred_data_{date}.json
+Free API key at: https://fred.stlouisfed.org/docs/api/api_key.html
+Set env var: FRED_API_KEY
+
+Fetches monthly CPI and weekly gas prices for US calibration.
+Output: data/raw/fred_data.json
 """
 
 import os
@@ -12,62 +15,69 @@ import requests
 from datetime import datetime
 from pathlib import Path
 
-API_KEY = os.environ.get("FRED_API_KEY", "")
-BASE_URL = "https://api.stlouisfed.org/fred/series/observations"
+FRED_API_KEY = os.environ.get("FRED_API_KEY", "")
+FRED_URL     = "https://api.stlouisfed.org/fred/series/observations"
+OUTPUT_DIR   = Path("data/raw")
 
 # FRED series to track
 SERIES = {
-    "cpi_all": "CPIAUCSL",           # CPI for All Urban Consumers
-    "gas_price": "GASREGW",           # US Regular Gasoline Price (weekly)
-    "breakeven_5y": "T5YIE",          # 5-Year Breakeven Inflation Rate
-    "breakeven_10y": "T10YIE",        # 10-Year Breakeven Inflation Rate
-    "dollar_index": "DTWEXBGS",       # Trade Weighted Dollar Index
-    "food_cpi": "CPIUFDSL",           # CPI: Food
-    "energy_cpi": "CPIENGSL",         # CPI: Energy
+    "us_cpi":       "CPIAUCSL",    # US CPI All Urban Consumers (monthly)
+    "us_gas":       "GASREGW",     # US Regular Gasoline Price Weekly ($/gallon)
+    "us_food_cpi":  "CPIUFDSL",    # US CPI Food (monthly)
+    "us_energy_cpi":"CPIENGSL",    # US CPI Energy (monthly)
+    "usd_index":    "DTWEXBGS",    # Trade Weighted USD Index (daily)
 }
 
-OUTPUT_DIR = Path("data/raw/fred")
-PROCESSED_DIR = Path("data/processed")
 
-
-def fetch_fred_series(series_id: str, start_date: str) -> list:
-    """Fetch a single FRED series."""
+def fetch_series(series_id: str, limit: int = 3) -> list:
+    """Fetch the last N observations of a FRED series."""
+    if not FRED_API_KEY:
+        return []
     params = {
-        "series_id": series_id,
-        "api_key": API_KEY,
-        "observation_start": start_date,
-        "file_type": "json",
+        "series_id":  series_id,
+        "api_key":    FRED_API_KEY,
+        "file_type":  "json",
+        "sort_order": "desc",
+        "limit":      limit,
     }
-    resp = requests.get(BASE_URL, params=params, timeout=30)
+    resp = requests.get(FRED_URL, params=params, timeout=20)
     resp.raise_for_status()
-    return resp.json().get("observations", [])
+    obs = resp.json().get("observations", [])
+    # Filter out missing values
+    return [o for o in obs if o.get("value") not in (".", "")]
 
 
 def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 
-    today = datetime.utcnow().strftime("%Y-%m-%d")
-    start = "2026-01-01"
+    if not FRED_API_KEY:
+        print("WARNING: FRED_API_KEY not set — skipping FRED fetch")
+        empty = {
+            "fetched_at": datetime.utcnow().isoformat() + "Z",
+            "note": "FRED_API_KEY not set",
+            "series": {},
+        }
+        with open(OUTPUT_DIR / "fred_data.json", "w") as f:
+            json.dump(empty, f, indent=2)
+        return
 
-    print(f"Fetching FRED data from {start} to {today}...")
+    print("Fetching FRED economic indicators...")
+    result = {"fetched_at": datetime.utcnow().isoformat() + "Z", "series": {}}
 
-    all_data = {}
     for name, series_id in SERIES.items():
         try:
-            print(f"  Fetching {name} ({series_id})...")
-            data = fetch_fred_series(series_id, start)
-            all_data[name] = data
-            print(f"    Got {len(data)} observations")
-        except requests.RequestException as e:
-            print(f"  ERROR fetching {name}: {e}")
-            all_data[name] = []
+            obs = fetch_series(series_id, limit=3)
+            result["series"][name] = obs
+            val = obs[0]["value"] if obs else "N/A"
+            print(f"  {name} ({series_id}): latest = {val}")
+        except Exception as e:
+            print(f"  WARNING: {name} failed — {e}")
+            result["series"][name] = []
 
-    # Save raw response
-    raw_file = OUTPUT_DIR / f"fred_data_{today}.json"
-    with open(raw_file, "w") as f:
-        json.dump({"fetched_at": today, "series": all_data}, f, indent=2)
-    print(f"Saved raw data to {raw_file}")
+    out = OUTPUT_DIR / "fred_data.json"
+    with open(out, "w") as f:
+        json.dump(result, f, indent=2)
+    print(f"Saved to {out}")
 
 
 if __name__ == "__main__":

@@ -169,7 +169,7 @@ tr:hover td{background:var(--bg-card-hover)}
     <h1>War Impact Observatory</h1>
     <p class="hero-sub">Open-source economic impact tracker for the 2026 US-Israel-Iran conflict. Measuring the cost to major economies and their citizens worldwide — oil prices, inflation, trade disruption, household costs, and second-order effects. Updated daily.</p>
     <div class="hero-meta">
-      <span>&#128197; Last updated: April 5, 2026</span>
+      <span id="dataTimestamp">&#128197; Last updated: April 5, 2026</span>
       <span>&#9201; Day 36 of conflict</span>
       <span>&#127758; 29 economies tracked</span>
       <span>&#128202; 6 impact channels</span>
@@ -555,22 +555,60 @@ const countryData = [
   {country:'Syria',flag:'\u{1F1F8}\u{1F1FE}',oilDep:80,inflImpact:15.0,gdpHit:-8.0,householdCost:350,avgIncomePPP:3600,fuelUp:95,foodUp:65,severity:'critical',currencyChg:-22.0,participant:true,ffShare:65},
   {country:'Yemen',flag:'\u{1F1FE}\u{1F1EA}',oilDep:100,inflImpact:10.0,gdpHit:-5.0,householdCost:120,avgIncomePPP:1800,fuelUp:80,foodUp:50,severity:'critical',currencyChg:-15.0,participant:true,ffShare:62},
 ];
-// Pre-compute derived metrics
-countryData.forEach(function(c) {
-  c.monthsLost = Math.round((c.householdCost / c.avgIncomePPP) * 12 * 10) / 10;
-  // Purchasing power erosion: % of real purchasing power lost due to war-driven inflation
-  // Formula: inflImpact / (100 + baselineInflation + inflImpact) * 100, approximated with 3% baseline
-  c.ppErosion = Math.round(c.inflImpact / (100 + 3 + c.inflImpact) * 100 * 10) / 10;
-  // Food & fuel budget share shift: pre-conflict vs post-conflict
-  // Post-conflict share rises because food+fuel prices go up more than overall prices
-  // Weighted price increase for food+fuel portion of budget
-  var foodWeight = 0.6; // food is ~60% of the food+fuel share
-  var fuelWeight = 0.4; // fuel is ~40%
-  var ffPriceIncrease = (foodWeight * c.foodUp + fuelWeight * c.fuelUp) / 100;
-  var overallInflation = c.inflImpact / 100;
-  c.ffSharePost = Math.round(c.ffShare * (1 + ffPriceIncrease) / (1 + overallInflation) * 10) / 10;
-  c.ffShift = Math.round((c.ffSharePost - c.ffShare) * 10) / 10;
-});
+
+// ── Derived metrics computation (called on startup and after live data loads) ─
+function computeDerivedMetrics() {
+  countryData.forEach(function(c) {
+    c.monthsLost = Math.round((c.householdCost / c.avgIncomePPP) * 12 * 10) / 10;
+    c.ppErosion = Math.round(c.inflImpact / (100 + 3 + c.inflImpact) * 100 * 10) / 10;
+    var foodWeight = 0.6;
+    var fuelWeight = 0.4;
+    var ffPriceIncrease = (foodWeight * c.foodUp + fuelWeight * c.fuelUp) / 100;
+    var overallInflation = c.inflImpact / 100;
+    c.ffSharePost = Math.round(c.ffShare * (1 + ffPriceIncrease) / (1 + overallInflation) * 10) / 10;
+    c.ffShift = Math.round((c.ffSharePost - c.ffShare) * 10) / 10;
+  });
+}
+computeDerivedMetrics();
+
+// ── Live data loader: fetches daily-updated JSON from the pipeline ────────────
+// Falls back to embedded hardcoded data silently if unavailable.
+(function loadLiveData() {
+  var url = 'data/processed/country_data.json?t=' + Date.now();
+  fetch(url)
+    .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function(json) {
+      if (!json || !Array.isArray(json.countries) || json.countries.length < 10) return;
+      // Check freshness: only apply if data is within 72 hours
+      var genAt = new Date(json.generated_at);
+      if ((Date.now() - genAt) > 72 * 3600 * 1000) return;
+
+      // Update dynamic fields only; keep research-based fields from hardcoded baseline
+      json.countries.forEach(function(live) {
+        var idx = countryData.findIndex(function(c) { return c.country === live.country; });
+        if (idx < 0) return;
+        countryData[idx].fuelUp        = live.fuelUp;
+        countryData[idx].currencyChg   = live.currencyChg;
+        countryData[idx].householdCost = live.householdCost;
+      });
+
+      // Recompute derived metrics with updated values
+      computeDerivedMetrics();
+
+      // Re-render all views
+      renderCountryTable();
+      renderCountryCards();
+
+      // Update data freshness indicator if element exists
+      var el = document.getElementById('dataTimestamp');
+      if (el && json.generated_at) {
+        var d = new Date(json.generated_at);
+        el.textContent = 'Live · ' + d.toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'});
+        el.title = 'Brent $' + json.brent_price + '/bbl · Updated ' + d.toUTCString();
+      }
+    })
+    .catch(function() { /* silently use embedded data */ });
+})();
 
 const impactChannels = [
   {icon:'\u26FD',color:'var(--red)',bg:'var(--red-dim)',title:'Energy & Fuel Prices',desc:'Brent crude surged from $73 to $126/barrel. US gasoline hit $4/gallon (+30%). Strait of Hormuz closure removed 20% of global oil supply. Largest supply disruption in history per IEA.',ml:'Peak Brent price',mv:'$126/bbl'},

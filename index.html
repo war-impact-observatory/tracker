@@ -95,7 +95,7 @@ tr:hover td{background:var(--bg-card-hover)}
 .btn-primary:hover{background:#3d8ec5}
 .btn-outline{background:transparent;color:var(--text-primary);border:1px solid var(--border)}
 .btn-outline:hover{border-color:var(--text-muted)}
-.tbl-scroll{overflow-x:auto}
+.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 /* Language Bar */
 .lang-bar{background:var(--bg-secondary);border-bottom:1px solid var(--border);padding:8px 0;position:sticky;top:0;z-index:100}
 .lang-inner{display:flex;align-items:center;gap:10px;overflow-x:auto;scrollbar-width:none}
@@ -107,10 +107,42 @@ tr:hover td{background:var(--bg-card-hover)}
 .lang-btn .lang-flag{font-size:14px}
 @media(max-width:768px){
   .footer-grid{grid-template-columns:1fr}
-  h1{font-size:32px}
-  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  h1{font-size:28px;letter-spacing:-1px}
+  .hero{padding:32px 0 24px}
+  .hero-sub{font-size:15px}
+  .hero-meta{gap:12px;font-size:12px}
+  .kpi-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .kpi{padding:14px}
+  .kpi-val{font-size:24px}
   .chart-grid{grid-template-columns:1fr}
-  .chart-wrap,.chart-wrap-sm{height:280px}
+  .chart-wrap,.chart-wrap-sm{height:240px}
+  .ch-grid{grid-template-columns:1fr}
+  .method-grid{grid-template-columns:1fr}
+  .nav-tabs{gap:2px;padding:12px 0}
+  .nav-tab{padding:8px 12px;font-size:13px}
+  .lang-label{display:none}
+  .lang-btn{padding:3px 7px;font-size:11px}
+  /* Country table: hide on mobile, show cards */
+  .tbl-scroll{display:none}
+  .country-cards{display:flex;flex-direction:column;gap:12px}
+  .c-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:16px}
+  .c-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .c-card-name{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .c-card-flag{font-size:22px}
+  .c-card-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .c-card-metric{background:var(--bg-secondary);border-radius:8px;padding:10px}
+  .c-card-metric-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;font-weight:600;margin-bottom:4px}
+  .c-card-metric-value{font-size:15px;font-weight:700;font-family:'JetBrains Mono',monospace}
+  .c-card-metric-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
+  .section-hdr{flex-direction:column;align-items:flex-start}
+  /* Sort bar for mobile cards */
+  .mobile-sort{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .mobile-sort-btn{padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);font-size:12px;cursor:pointer;font-family:inherit;font-weight:500}
+  .mobile-sort-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+}
+@media(min-width:769px){
+  .country-cards{display:none}
+  .mobile-sort{display:none}
 }
 </style>
 </head>
@@ -230,6 +262,17 @@ tr:hover td{background:var(--bg-card-hover)}
     </tr></thead>
     <tbody id="countryBody"></tbody>
   </table></div></div>
+  <!-- Mobile card sort bar -->
+  <div class="mobile-sort" id="mobileSortBar">
+    <button class="mobile-sort-btn active" data-msort="severity">Severity</button>
+    <button class="mobile-sort-btn" data-msort="inflImpact">Inflation</button>
+    <button class="mobile-sort-btn" data-msort="householdCost">Cost/yr</button>
+    <button class="mobile-sort-btn" data-msort="ppErosion">Buying Power</button>
+    <button class="mobile-sort-btn" data-msort="ffShift">Budget Squeeze</button>
+    <button class="mobile-sort-btn" data-msort="gdpHit">GDP</button>
+  </div>
+  <!-- Mobile cards (shown instead of table on small screens) -->
+  <div class="country-cards" id="countryCards"></div>
 </div>
 
 <!-- ========== IMPACT CHANNELS TAB ========== -->
@@ -789,6 +832,56 @@ function renderCountryTable() {
   document.getElementById('countryBody').innerHTML = html;
 }
 renderCountryTable();
+
+// ─── MOBILE COUNTRY CARDS ─────────────────────────────────────────
+var mobileSort = 'severity';
+var sevOrder2 = { critical: 0, high: 1, moderate: 2, low: 3 };
+
+function renderCountryCards() {
+  var sorted = countryData.slice().sort(function(a, b) {
+    if (mobileSort === 'severity') return sevOrder2[a.severity] - sevOrder2[b.severity];
+    if (mobileSort === 'gdpHit') return a[mobileSort] - b[mobileSort];
+    return b[mobileSort] - a[mobileSort];
+  });
+  var sevColors = { critical:'var(--red)', high:'var(--orange)', moderate:'var(--yellow)', low:'var(--green)' };
+  var html = '';
+  sorted.forEach(function(c) {
+    var gdpColor = c.gdpHit > 0 ? 'var(--green)' : 'var(--red)';
+    var curColor = c.currencyChg > 0 ? 'var(--green)' : 'var(--red)';
+    var ppColor = c.ppErosion > 5 ? 'var(--red)' : c.ppErosion > 2 ? 'var(--orange)' : 'var(--yellow)';
+    var shiftColor = c.ffShift > 5 ? 'var(--red)' : c.ffShift > 2 ? 'var(--orange)' : 'var(--yellow)';
+    html += '<div class="c-card">' +
+      '<div class="c-card-header">' +
+        '<div class="c-card-name"><span class="c-card-flag">' + c.flag + '</span>' + c.country + '</div>' +
+        '<span class="sev sev-' + c.severity + '">' + c.severity + '</span>' +
+      '</div>' +
+      '<div class="c-card-grid">' +
+        '<div class="c-card-metric"><div class="c-card-metric-label">Inflation Impact</div><div class="c-card-metric-value" style="color:var(--orange)">+' + c.inflImpact.toFixed(1) + 'pp</div></div>' +
+        '<div class="c-card-metric"><div class="c-card-metric-label">Household Cost/yr</div><div class="c-card-metric-value" style="color:var(--red)">$' + c.householdCost.toLocaleString() + '</div></div>' +
+        '<div class="c-card-metric"><div class="c-card-metric-label">Buying Power Loss</div><div class="c-card-metric-value" style="color:' + ppColor + '">-' + c.ppErosion.toFixed(1) + '%</div></div>' +
+        '<div class="c-card-metric"><div class="c-card-metric-label">Budget Squeeze</div><div class="c-card-metric-value" style="color:' + shiftColor + '">+' + c.ffShift.toFixed(1) + 'pp</div><div class="c-card-metric-sub">' + c.ffShare + '% → ' + c.ffSharePost + '%</div></div>' +
+        '<div class="c-card-metric"><div class="c-card-metric-label">GDP Impact</div><div class="c-card-metric-value" style="color:' + gdpColor + '">' + (c.gdpHit > 0 ? '+' : '') + c.gdpHit.toFixed(1) + '%</div></div>' +
+        '<div class="c-card-metric"><div class="c-card-metric-label">Currency</div><div class="c-card-metric-value" style="color:' + curColor + '">' + (c.currencyChg > 0 ? '+' : '') + c.currencyChg.toFixed(1) + '%</div></div>' +
+      '</div>' +
+    '</div>';
+  });
+  var el = document.getElementById('countryCards');
+  if (el) el.innerHTML = html;
+}
+renderCountryCards();
+
+// Mobile sort buttons
+var mobileSortBar = document.getElementById('mobileSortBar');
+if (mobileSortBar) {
+  mobileSortBar.addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-msort]');
+    if (!btn) return;
+    mobileSort = btn.dataset.msort;
+    mobileSortBar.querySelectorAll('.mobile-sort-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    renderCountryCards();
+  });
+}
 
 document.getElementById('countryTable').querySelector('thead').addEventListener('click', function(e) {
   var th = e.target.closest('th');

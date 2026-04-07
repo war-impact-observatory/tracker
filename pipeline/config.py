@@ -1,11 +1,12 @@
 """
 War Impact Observatory — Pipeline Configuration
-Baseline values (pre-conflict, ~April 2025) and country-level parameters.
+Baseline values (pre-conflict, 3-day avg Feb 25-27 2026) and country-level parameters.
 """
 
 # ── Oil Price Baseline ────────────────────────────────────────────────────────
-# Brent crude spot price (USD/bbl) before conflict escalation
-BASELINE_BRENT = 73.0
+# Brent crude spot price (USD/bbl): 3-day average Feb 25-27, 2026 (days before conflict)
+# February 2026 monthly average was $69.41 (FRED); slight pre-war tension premium → $70.0
+BASELINE_BRENT = 70.0
 CONFLICT_START_DATE = "2026-02-28"
 
 # ── ECB API (Free, No Key Required) ──────────────────────────────────────────
@@ -18,30 +19,32 @@ FRED_BRENT_ID  = "DCOILBRENTEU"   # Brent crude daily (USD/bbl)
 FRED_WTI_ID    = "DCOILWTICO"     # WTI crude daily  (USD/bbl)
 FRED_US_CPI_ID = "CPIAUCSL"       # US CPI monthly
 
-# ── Baseline EUR/currency rates (pre-conflict, April 2025 approx) ─────────────
+# ── Baseline EUR/currency rates (3-day avg Feb 25-27, 2026 — days before conflict) ──
 # ECB quotes as "how many local units per 1 EUR"
+# Sources: ECB official API (primary); verified web sources for SAR, ARS, RUB;
+#          USD-peg arithmetic for IQD, QAR, KWD, AED
 BASELINE_EUR_RATES = {
-    "USD": 1.085,
-    "CNY": 7.850,
-    "INR": 90.1,
-    "JPY": 161.7,
-    "GBP": 0.854,
-    "BRL": 5.640,
-    "CAD": 1.476,
-    "AUD": 1.703,
-    "KRW": 1454.0,
-    "MXN": 18.66,
-    "IDR": 16926.0,
-    "TRY": 35.26,
-    "SAR": 4.07,
-    "ARS": 944.0,
-    "ZAR": 20.4,
-    "RUB": 96.6,
-    "ILS": 3.98,
-    "IQD": 1419.0,
-    "QAR": 3.95,
-    "KWD": 0.333,
-    "AED": 3.985,
+    "USD": 1.1801,    # ECB 3-day avg
+    "CNY": 8.0911,    # ECB 3-day avg
+    "INR": 107.3695,  # ECB 3-day avg
+    "JPY": 184.40,    # ECB 3-day avg
+    "GBP": 0.8732,    # ECB 3-day avg
+    "BRL": 6.0618,    # ECB 3-day avg
+    "CAD": 1.6142,    # ECB 3-day avg
+    "AUD": 1.6607,    # ECB 3-day avg
+    "KRW": 1689.71,   # ECB 3-day avg
+    "MXN": 20.2731,   # ECB 3-day avg
+    "IDR": 19818.9,   # ECB 3-day avg
+    "TRY": 51.8104,   # ECB 3-day avg
+    "ILS": 3.6776,    # ECB 3-day avg
+    "ZAR": 18.7546,   # ECB 3-day avg
+    "SAR": 4.4297,    # web-verified (≈ 3.75 USD-peg × 1.1801)
+    "ARS": 1649.4,    # web-verified (exchange-rates.org)
+    "RUB": 91.023,    # web-verified (exchange-rates.org)
+    "IQD": 1543.9,    # derived: IQD/USD peg ~1308 × 1.1801
+    "QAR": 4.2967,    # derived: QAR/USD peg 3.641 × 1.1801
+    "KWD": 0.3624,    # derived: KWD/USD ~0.307 × 1.1801
+    "AED": 4.3345,    # derived: AED/USD peg 3.673 × 1.1801
     # ECB does not track these — use manual/static fallback
     "LBP": 97200.0,
     "SYP": 15000.0,
@@ -55,8 +58,9 @@ BASELINE_EUR_RATES = {
 #                    (computed as historical fuelUp / oil_price_change_pct)
 #   ecb_tracked    : whether ECB publishes this currency (else use static fallback)
 #
-# Pass-through coefficients reverse-engineered from observed data:
-# oil_change_pct = (126 - 73) / 73 * 100 = 72.6%  →  coeff = fuelUp / 72.6
+# Pass-through coefficients: structural sensitivity of retail fuel to oil price
+# Calibrated as: coeff = seed_fuelUp / oil_change_pct_at_baseline
+# With baseline $70 → $110: oil_change_pct = (110-70)/70*100 = 57.1%
 
 COUNTRY_CONFIG = {
     "United States":   {"currency": "USD", "passThrough": 0.413, "ecb_tracked": True},

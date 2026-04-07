@@ -18,6 +18,7 @@ from pathlib import Path
 
 BASELINE_DIR  = Path("data/baseline")
 PROCESSED_DIR = Path("data/processed")
+HISTORY_DIR   = Path("data/history")
 RAW_DIR       = Path("data/raw")
 
 
@@ -97,9 +98,22 @@ def main():
         "countries": countries_out,
     }
 
+    # Write live dashboard file
     out_path = PROCESSED_DIR / "country_data.json"
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(output, f, indent=2, ensure_ascii=False)
+
+    # Archive daily snapshot to data/history/YYYY-MM-DD.json
+    # This powers the newsletter trend comparisons and future API/paid data products
+    HISTORY_DIR.mkdir(parents=True, exist_ok=True)
+    today_str   = datetime.utcnow().strftime("%Y-%m-%d")
+    history_path = HISTORY_DIR / f"{today_str}.json"
+    if not history_path.exists():   # don't overwrite if already ran today
+        with open(history_path, "w", encoding="utf-8") as f:
+            json.dump(output, f, indent=2, ensure_ascii=False)
+        print(f"  History snapshot saved: {history_path}")
+    else:
+        print(f"  History snapshot already exists for {today_str} — skipped")
 
     print(f"Dashboard JSON generated: {out_path}")
     print(f"  Countries: {len(countries_out)}  |  Critical: {critical_count}")

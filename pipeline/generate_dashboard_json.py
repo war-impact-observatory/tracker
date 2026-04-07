@@ -52,7 +52,8 @@ def main():
         computed_by_country = computed["countries"]
 
     brent_price    = (oil_data or {}).get("brent_usd", 126.0)
-    brent_baseline = 73.0
+    # Read brent_baseline from computed_metrics (set by config.BASELINE_BRENT) — never hardcode
+    brent_baseline = (computed or {}).get("brent_baseline", 70.0)
 
     countries_out = []
     for b in baseline_countries:

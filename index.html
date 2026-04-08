@@ -198,18 +198,18 @@ tr:hover td{background:var(--bg-card-hover)}
 <!-- ========== DASHBOARD TAB ========== -->
 <div class="section active" id="tab-dashboard">
   <div class="kpi-grid">
-    <div class="kpi"><div class="kpi-label">Brent Crude</div><div class="kpi-val">$113</div><div class="kpi-chg">+55% since Feb 27</div><div class="kpi-src">vs. $73 pre-conflict</div></div>
-    <div class="kpi"><div class="kpi-label">US Gas Price</div><div class="kpi-val">$4.00</div><div class="kpi-chg">+30% per gallon</div><div class="kpi-src">As of Mar 31</div></div>
+    <div class="kpi"><div class="kpi-label">Brent Crude</div><div class="kpi-val" id="kpi-brent-val">$122</div><div class="kpi-chg" id="kpi-brent-chg">+74% since Feb 27</div><div class="kpi-src" id="kpi-brent-src">vs. $70 pre-conflict</div></div>
+    <div class="kpi"><div class="kpi-label">US Gas Price</div><div class="kpi-val" id="kpi-gas-val">$4.02</div><div class="kpi-chg" id="kpi-gas-chg">+31% per gallon</div><div class="kpi-src" id="kpi-gas-src">Pipeline estimate</div></div>
     <div class="kpi"><div class="kpi-label">Global Inflation</div><div class="kpi-val">4.0%</div><div class="kpi-chg">+0.8pp from baseline</div><div class="kpi-src">OECD forecast</div></div>
     <div class="kpi"><div class="kpi-label">Hormuz Transits</div><div class="kpi-val">6/day</div><div class="kpi-chg">-95% collapse</div><div class="kpi-src">vs. 130/day pre-conflict</div></div>
     <div class="kpi"><div class="kpi-label">Supply Disrupted</div><div class="kpi-val">10M bpd</div><div class="kpi-chg">Largest ever (IEA)</div><div class="kpi-src">As of Mar 12</div></div>
-    <div class="kpi"><div class="kpi-label">Days of Conflict</div><div class="kpi-val">36</div><div class="kpi-chg">Since Feb 28, 2026</div><div class="kpi-src">Ongoing</div></div>
+    <div class="kpi"><div class="kpi-label">Days of Conflict</div><div class="kpi-val" id="kpi-days-val">39</div><div class="kpi-chg">Since Feb 28, 2026</div><div class="kpi-src">Ongoing</div></div>
   </div>
 
   <!-- Oil Price Chart -->
   <div class="card">
     <div class="card-title">Oil Price Timeline</div>
-    <div class="card-sub">Brent Crude &amp; WTI spot prices (USD/barrel) — Feb 27 to Apr 5, 2026</div>
+    <div class="card-sub">Brent Crude &amp; WTI spot prices (USD/barrel) — Feb 27 to Apr 8, 2026</div>
     <div class="chart-wrap"><canvas id="oilChart"></canvas></div>
   </div>
 
@@ -495,7 +495,7 @@ function applyLanguage(lang) {
 
 // ─── DATA ─────────────────────────────────────────────────────────
 const oilPriceData = [
-  {date:'Feb 27',brent:73,wti:69,event:'Pre-conflict baseline'},
+  {date:'Feb 27',brent:70,wti:66,event:'Pre-conflict baseline ($70)'},
   {date:'Feb 28',brent:80,wti:76,event:'US-Israel strikes begin'},
   {date:'Mar 1',brent:82,wti:78},
   {date:'Mar 4',brent:91,wti:86,event:'Hormuz closure announced'},
@@ -509,7 +509,7 @@ const oilPriceData = [
   {date:'Mar 25',brent:109,wti:102},
   {date:'Mar 30',brent:116,wti:108,event:'US gas hits $4/gal'},
   {date:'Apr 2',brent:112,wti:105},
-  {date:'Apr 5',brent:113,wti:100,event:'Current'},
+  {date:'Apr 8',brent:122,wti:107,event:'Current ($122/bbl)'},
 ];
 
 const inflationData = {
@@ -571,6 +571,15 @@ function computeDerivedMetrics() {
 }
 computeDerivedMetrics();
 
+// ── Days of Conflict: always compute from today's date ───────────────────────
+(function() {
+  var start = new Date('2026-02-28T00:00:00Z');
+  var now   = new Date();
+  var days  = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+  var el    = document.getElementById('kpi-days-val');
+  if (el) el.textContent = days;
+})();
+
 // ── Live data loader: fetches daily-updated JSON from the pipeline ────────────
 // Falls back to embedded hardcoded data silently if unavailable.
 (function loadLiveData() {
@@ -599,6 +608,32 @@ computeDerivedMetrics();
       renderCountryTable();
       renderCountryCards();
 
+      // ── Update top KPI cards from live JSON ──────────────────────────
+      var BASE_GAS_USD = 3.08; // US pre-war gas price ($/gal), Feb 25-27 avg
+
+      // Brent Crude
+      var bEl = document.getElementById('kpi-brent-val');
+      if (bEl) bEl.textContent = '$' + Math.round(json.brent_price);
+      var bChg = document.getElementById('kpi-brent-chg');
+      if (bChg) bChg.textContent = '+' + json.oil_change_pct.toFixed(0) + '% since Feb 27';
+      var bSrc = document.getElementById('kpi-brent-src');
+      if (bSrc) bSrc.textContent = 'vs. $' + json.brent_baseline.toFixed(0) + ' pre-conflict';
+
+      // US Gas Price — computed from US fuelUp in country data
+      var usLive = json.countries && json.countries.find(function(c){ return c.country === 'United States'; });
+      if (usLive) {
+        var gasPrice = BASE_GAS_USD * (1 + usLive.fuelUp / 100);
+        var gEl = document.getElementById('kpi-gas-val');
+        if (gEl) gEl.textContent = '$' + gasPrice.toFixed(2);
+        var gChg = document.getElementById('kpi-gas-chg');
+        if (gChg) gChg.textContent = '+' + usLive.fuelUp.toFixed(0) + '% per gallon';
+        var gSrc = document.getElementById('kpi-gas-src');
+        if (gSrc) {
+          var genDate = new Date(json.generated_at);
+          gSrc.textContent = 'Pipeline est. · ' + genDate.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+        }
+      }
+
       // Update data freshness indicator if element exists
       var el = document.getElementById('dataTimestamp');
       if (el && json.generated_at) {
@@ -611,12 +646,12 @@ computeDerivedMetrics();
 })();
 
 const impactChannels = [
-  {icon:'\u26FD',color:'var(--red)',bg:'var(--red-dim)',title:'Energy & Fuel Prices',desc:'Brent crude surged from $73 to $126/barrel. US gasoline hit $4/gallon (+30%). Strait of Hormuz closure removed 20% of global oil supply. Largest supply disruption in history per IEA.',ml:'Peak Brent price',mv:'$126/bbl'},
+  {icon:'\u26FD',color:'var(--red)',bg:'var(--red-dim)',title:'Energy & Fuel Prices',desc:'Brent crude surged from $70 to $126/barrel (+80%). US gasoline hit $4/gallon (+31%). Strait of Hormuz closure removed 20% of global oil supply. Largest supply disruption in history per IEA.',ml:'Peak Brent price',mv:'$126/bbl'},
   {icon:'\u{1F33E}',color:'var(--orange)',bg:'var(--orange-dim)',title:'Food & Fertilizer',desc:'30% of global urea exports transit Hormuz. China restricted fertilizer exports. Food prices rising in import-dependent nations. Wheat, rice, and dairy costs climbing across Asia and Africa.',ml:'Fertilizer disruption',mv:'30%'},
   {icon:'\u{1F4C9}',color:'var(--yellow)',bg:'var(--yellow-dim)',title:'GDP & Growth',desc:'Oxford Economics: prolonged conflict could tip global recession. Global growth revised down from 2.9% to 2.6%. Germany and Italy face technical recession risk by Q4 2026. ECB warns of stagflation.',ml:'Global GDP impact',mv:'-0.3pp'},
-  {icon:'\u{1F4B1}',color:'var(--purple)',bg:'var(--purple-dim)',title:'Currencies & Capital Flows',desc:'Emerging market currencies weakening sharply. Indian rupee, Turkish lira, South African rand under pressure. Flight to USD and gold. Central banks may be forced to hike rates despite slowing growth.',ml:'INR depreciation',mv:'-4.3%'},
+  {icon:'\u{1F4B1}',color:'var(--purple)',bg:'var(--purple-dim)',title:'Currencies & Capital Flows',desc:'Emerging market currencies weakening sharply. Indian rupee (-2.3%), Turkish lira (-1.3%), South African rand (-7.0%) under pressure. Flight to USD and gold. Central banks may be forced to hike rates despite slowing growth.',ml:'INR depreciation',mv:'-2.3%'},
   {icon:'\u{1F6A2}',color:'var(--blue)',bg:'var(--blue-dim)',title:'Trade & Supply Chains',desc:'Hormuz transits collapsed 95% (130 to 6/day). Global merchandise trade growth halved. Shipping insurance premiums up 400%. Plastics and petrochemical chains disrupted globally.',ml:'Shipping collapse',mv:'-95%'},
-  {icon:'\u{1F3E0}',color:'var(--green)',bg:'var(--green-dim)',title:'Household Welfare',desc:'Average US household facing ~$2,400/yr extra cost. Indian households ~$480/yr (much larger relative to income). Energy poverty risk rising in South Asia and Sub-Saharan Africa.',ml:'US household cost',mv:'$2,400/yr'},
+  {icon:'\u{1F3E0}',color:'var(--green)',bg:'var(--green-dim)',title:'Household Welfare',desc:'Average US household facing ~$2,340/yr extra cost. Indian households ~$1,180/yr (much larger relative to income at $9,800 PPP). Energy poverty risk rising in South Asia and Sub-Saharan Africa.',ml:'US household cost',mv:'$2,340/yr'},
 ];
 
 const methodCritique = [
@@ -641,28 +676,28 @@ const broadcastStrategies = [
 ];
 
 const pressSnippetText = `FOR IMMEDIATE USE \u2014 War Impact Observatory
-Updated: April 5, 2026 | Source: warimpactobservatory.org (CC BY 4.0)
+Updated: April 8, 2026 | Source: yantralive.github.io/War-Impact-Observatory (CC BY 4.0)
 
 HEADLINE: Iran Conflict Drives Largest Oil Supply Disruption in History;
-Households Worldwide Face $480\u2013$2,800 in Annual Extra Costs
+Households Worldwide Face $700\u2013$6,500 in Annual Extra Costs
 
 KEY FIGURES:
-\u2022 Brent crude: $113/barrel (+55% since Feb 27)
+\u2022 Brent crude: $122/barrel (+74% vs. $70 pre-conflict baseline)
 \u2022 Strait of Hormuz transits: down 95% (130 \u2192 6 ships/day)
 \u2022 Global oil supply loss: 10+ million barrels/day (largest ever, per IEA)
-\u2022 US gasoline: $4.00/gallon (+30%)
+\u2022 US gasoline: ~$4.02/gallon (+31%)
 \u2022 Global inflation forecast: 4.0% (OECD), up from 3.2% pre-conflict
 \u2022 Most vulnerable: Turkey (+3.2pp inflation), India (+2.1pp), S. Korea (+2.0pp)
 
 HOUSEHOLD IMPACT (estimated additional annual cost):
-\u2022 Germany: $2,800 | US: $2,400 | Italy: $2,300 | UK: $2,200
-\u2022 Japan: $2,100 | Australia: $1,900 | South Korea: $1,600
-\u2022 India: $480 | Turkey: $380 | Brazil: $350 | Indonesia: $210
+\u2022 Iran: $6,535 | Lebanon: $5,745 | Qatar: $4,485 | Turkey: $4,194
+\u2022 Germany: $2,715 | US: $2,340 | South Korea: $2,434 | UK: $1,824
+\u2022 India: $1,180 | Indonesia: $1,599 | Brazil: $835 | Yemen: $700
 
 SECOND-ORDER EFFECTS:
 \u2022 30% of global fertilizer exports disrupted \u2192 food price acceleration
 \u2022 ECB warns of stagflation; Germany & Italy face technical recession risk
-\u2022 Emerging market currencies weakening (TRY -6.2%, INR -4.3%, ZAR -4.1%)
+\u2022 Emerging market currencies weakening (ZAR -7.0%, INR -2.3%, TRY -1.3%)
 \u2022 China restricted fertilizer exports to protect domestic food supply
 \u2022 Global trade growth forecast halved: 4.7% \u2192 1.5\u20132.5%
 
@@ -676,15 +711,15 @@ LICENSE: Creative Commons Attribution 4.0 International`;
 
 const twitterThreadText = `\u{1F9F5} THREAD: The economic cost of the Iran war \u2014 by the numbers
 
-1/ Oil prices have surged 55% since Feb 28. Brent crude hit $126/barrel at peak. This is the LARGEST oil supply disruption in history, per the IEA. Here's what it means for your wallet \u{1F447}
+1/ Oil prices have surged 74% since Feb 28 (Brent: $70 \u2192 $122/barrel). Peak was $126. This is the LARGEST oil supply disruption in history, per the IEA. Here's what it means for your wallet \u{1F447}
 
-2/ \u{1F1FA}\u{1F1F8} US: Gas prices hit $4/gallon (+30%). Average household facing ~$2,400/yr in extra costs. Inflation jumped from 2.4% \u2192 3.4% in one month.
+2/ \u{1F1FA}\u{1F1F8} US: Gas prices hit ~$4/gallon (+31%). Average household facing ~$2,340/yr in extra costs. Inflation jumped from 2.4% \u2192 3.4% in one month.
 
-3/ \u{1F1EE}\u{1F1F3} India: Most vulnerable major economy. 85% oil import dependent. Inflation +2.1pp. Rupee down 4.3%. Households face $480/yr extra \u2014 devastating at Indian income levels.
+3/ \u{1F1EE}\u{1F1F3} India: 85% oil import dependent. Inflation +2.1pp. Rupee down 2.3% war-specific. Households face $1,180/yr extra \u2014 devastating relative to $9,800 PPP income.
 
-4/ \u{1F1E9}\u{1F1EA} Germany: \u20AC2,800/yr extra per household. ECB warns of stagflation. Technical recession risk by Q4. Energy-intensive industry under acute stress.
+4/ \u{1F1E9}\u{1F1EA} Germany: $2,715/yr extra per household. ECB warns of stagflation. Technical recession risk by Q4. Energy-intensive industry under acute stress.
 
-5/ \u{1F1F9}\u{1F1F7} Turkey: Worst inflation impact at +3.2pp. Lira down 6.2%. Already fragile economy faces compounding crisis.
+5/ \u{1F1F9}\u{1F1F7} Turkey: Worst fuel pass-through at +3.2pp inflation. Lira down 1.3% war-specific. Already fragile economy faces compounding crisis.
 
 6/ The Strait of Hormuz \u2014 carrying 20% of global oil \u2014 went from 130 ship transits/day to just 6. That's a 95% collapse. Nothing like this has happened before.
 

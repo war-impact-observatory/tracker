@@ -1,7 +1,6 @@
 {
-  "brent_usd": 95.0,
-  "date": "2026-04-08",
-  "source": "Spot market \u2014 ceasefire day. CNBC/NBC confirmed ~$95/bbl",
-  "fetched_at": "2026-04-09T03:39:00Z",
-  "note": "Trump 2-week ceasefire Apr 8 \u2014 Brent fell ~15% from $109 to $95"
+  "brent_usd": 138.21,
+  "date": "2026-04-07",
+  "source": "EIA/RBRTE",
+  "fetched_at": "2026-04-09T10:20:47.158335Z"
 }

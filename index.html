@@ -170,7 +170,7 @@ tr:hover td{background:var(--bg-card-hover)}
     <p class="hero-sub">Open-source economic impact tracker for the 2026 US-Israel-Iran conflict. Measuring the cost to major economies and their citizens worldwide — oil prices, inflation, trade disruption, household costs, and second-order effects. Updated daily.</p>
     <div class="hero-meta">
       <span id="dataTimestamp">&#128197; Last updated: April 5, 2026</span>
-      <span>&#9201; Day 36 of conflict</span>
+      <span id="heroConflictDays">&#9201; Day 40 of conflict</span>
       <span>&#127758; 29 economies tracked</span>
       <span>&#128202; 6 impact channels</span>
     </div>
@@ -576,8 +576,10 @@ computeDerivedMetrics();
   var start = new Date('2026-02-28T00:00:00Z');
   var now   = new Date();
   var days  = Math.floor((now - start) / (1000 * 60 * 60 * 24));
-  var el    = document.getElementById('kpi-days-val');
-  if (el) el.textContent = days;
+  var kpiEl  = document.getElementById('kpi-days-val');
+  if (kpiEl) kpiEl.textContent = days;
+  var heroEl = document.getElementById('heroConflictDays');
+  if (heroEl) heroEl.textContent = '\u23F1 Day ' + days + ' of conflict';
 })();
 
 // ── Live data loader: fetches daily-updated JSON from the pipeline ────────────

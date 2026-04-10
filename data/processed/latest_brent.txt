@@ -1,5 +1,1 @@
-<<<<<<< HEAD
-Brent $138.21/bbl
-=======
 Brent $95.0/bbl
->>>>>>> a5d3534 (Fix pipeline: sanity validation + override mechanism + correct $95 data)

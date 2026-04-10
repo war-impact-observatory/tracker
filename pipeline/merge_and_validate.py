@@ -28,7 +28,8 @@ OPTIONAL_FILES = [
     RAW_DIR / "exchange_rates.json",      # non-critical; fallback to baseline rates
 ]
 
-BRENT_MIN, BRENT_MAX = 20.0, 400.0
+BRENT_MIN, BRENT_MAX       = 30.0, 250.0   # tightened from 20–400
+BRENT_MAX_DAILY_CHANGE_PCT = 25.0           # >25% single-day swing = suspect
 MIN_COUNTRIES         = 20
 
 
@@ -55,12 +56,35 @@ def check_oil_price() -> bool:
     if not data:
         print("  [FAIL] oil_prices.json is empty or missing")
         return False
+
     price = data.get("brent_usd", 0)
-    if BRENT_MIN <= price <= BRENT_MAX:
-        print(f"  [OK] Brent = ${price}/bbl (source: {data.get('source', '?')})")
-        return True
-    print(f"  [FAIL] Brent price ${price} outside expected range ${BRENT_MIN}–${BRENT_MAX}")
-    return False
+
+    # Absolute bounds check
+    if not (BRENT_MIN <= price <= BRENT_MAX):
+        print(f"  [FAIL] Brent ${price}/bbl outside allowed range ${BRENT_MIN}–${BRENT_MAX}")
+        return False
+
+    # Day-over-day sanity check
+    prev_data = load_json(PROCESSED_DIR / "computed_metrics.json")
+    if prev_data:
+        prev_price = prev_data.get("brent_price")
+        if prev_price and prev_price > 0:
+            change_pct = abs(price - prev_price) / prev_price * 100
+            if change_pct > BRENT_MAX_DAILY_CHANGE_PCT:
+                src = data.get("source", "?")
+                print(f"  [FAIL] Brent ${price}/bbl is {change_pct:.1f}% away from "
+                      f"previous ${prev_price}/bbl — exceeds {BRENT_MAX_DAILY_CHANGE_PCT}% threshold")
+                print(f"  Source: {src}")
+                print(f"  → Likely a bad API value. Set data/raw/oil_price_override.json to override.")
+                return False
+            print(f"  [OK] Brent = ${price}/bbl ({change_pct:+.1f}% vs prev ${prev_price}) "
+                  f"[{data.get('source','?')}]")
+        else:
+            print(f"  [OK] Brent = ${price}/bbl (no prev to compare) [{data.get('source','?')}]")
+    else:
+        print(f"  [OK] Brent = ${price}/bbl [{data.get('source','?')}]")
+
+    return True
 
 
 def check_exchange_rates() -> bool:

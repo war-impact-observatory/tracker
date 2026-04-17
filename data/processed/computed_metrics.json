@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-04-16T10:44:41.861797Z",
+  "generated_at": "2026-04-17T10:36:40.828509Z",
   "brent_price": 95.0,
   "brent_baseline": 70.0,
   "oil_change_pct": 35.7,
-  "eur_usd": 1.178,
+  "eur_usd": 1.1782,
   "countries": {
     "United States": {
       "fuelUp": 14.8,
@@ -17,12 +17,12 @@
     },
     "India": {
       "fuelUp": 17.2,
-      "currencyChg": -2.7,
+      "currencyChg": -2.5,
       "householdCost": 832
     },
     "Japan": {
       "fuelUp": 13.8,
-      "currencyChg": -1.8,
+      "currencyChg": -1.7,
       "householdCost": 1214
     },
     "Germany": {
@@ -32,7 +32,7 @@
     },
     "United Kingdom": {
       "fuelUp": 12.8,
-      "currencyChg": 0.3,
+      "currencyChg": 0.2,
       "householdCost": 1243
     },
     "France": {
@@ -42,22 +42,22 @@
     },
     "Brazil": {
       "fuelUp": 8.9,
-      "currencyChg": 2.7,
+      "currencyChg": 2.9,
       "householdCost": 586
     },
     "Canada": {
       "fuelUp": 9.9,
-      "currencyChg": -0.8,
+      "currencyChg": -0.4,
       "householdCost": 796
     },
     "Australia": {
       "fuelUp": 12.3,
-      "currencyChg": 0.4,
+      "currencyChg": 0.9,
       "householdCost": 1097
     },
     "South Korea": {
       "fuelUp": 14.8,
-      "currencyChg": -3.2,
+      "currencyChg": -3.1,
       "householdCost": 1666
     },
     "Italy": {
@@ -67,7 +67,7 @@
     },
     "Mexico": {
       "fuelUp": 9.9,
-      "currencyChg": -0.7,
+      "currencyChg": -0.5,
       "householdCost": 1038
     },
     "Indonesia": {
@@ -77,7 +77,7 @@
     },
     "Turkey": {
       "fuelUp": 19.7,
-      "currencyChg": -1.8,
+      "currencyChg": -2.0,
       "householdCost": 2995
     },
     "Saudi Arabia": {
@@ -92,7 +92,7 @@
     },
     "South Africa": {
       "fuelUp": 15.8,
-      "currencyChg": -3.3,
+      "currencyChg": -3.1,
       "householdCost": 1150
     },
     "Russia": {
@@ -112,7 +112,7 @@
     },
     "Israel": {
       "fuelUp": 18.7,
-      "currencyChg": 3.6,
+      "currencyChg": 4.0,
       "householdCost": 1697
     },
     "Iraq": {

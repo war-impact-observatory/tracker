@@ -209,7 +209,7 @@ tr:hover td{background:var(--bg-card-hover)}
   <!-- Oil Price Chart -->
   <div class="card">
     <div class="card-title">Oil Price Timeline</div>
-    <div class="card-sub">Brent Crude &amp; WTI spot prices (USD/barrel) — Feb 27 to Apr 8, 2026</div>
+    <div class="card-sub" id="oilChartSub">Brent Crude &amp; WTI spot prices (USD/barrel) — Feb 27 to Apr 21, 2026</div>
     <div class="chart-wrap"><canvas id="oilChart"></canvas></div>
   </div>
 
@@ -648,12 +648,12 @@ computeDerivedMetrics();
 })();
 
 const impactChannels = [
-  {icon:'\u26FD',color:'var(--red)',bg:'var(--red-dim)',title:'Energy & Fuel Prices',desc:'Brent crude surged from $70 to $126/barrel (+80%). US gasoline hit $4/gallon (+31%). Strait of Hormuz closure removed 20% of global oil supply. Largest supply disruption in history per IEA.',ml:'Peak Brent price',mv:'$126/bbl'},
+  {icon:'\u26FD',color:'var(--red)',bg:'var(--red-dim)',title:'Energy & Fuel Prices',desc:'Brent crude peaked at $126/barrel (+80% from $70 baseline) before falling to $95 after the Apr 8 US-Iran ceasefire (+36%). US gasoline reached $4/gallon then eased to ~$3.54. Hormuz closure removed 20% of global oil supply — largest disruption in history per IEA.',ml:'Conflict Brent peak',mv:'$126/bbl'},
   {icon:'\u{1F33E}',color:'var(--orange)',bg:'var(--orange-dim)',title:'Food & Fertilizer',desc:'30% of global urea exports transit Hormuz. China restricted fertilizer exports. Food prices rising in import-dependent nations. Wheat, rice, and dairy costs climbing across Asia and Africa.',ml:'Fertilizer disruption',mv:'30%'},
   {icon:'\u{1F4C9}',color:'var(--yellow)',bg:'var(--yellow-dim)',title:'GDP & Growth',desc:'Oxford Economics: prolonged conflict could tip global recession. Global growth revised down from 2.9% to 2.6%. Germany and Italy face technical recession risk by Q4 2026. ECB warns of stagflation.',ml:'Global GDP impact',mv:'-0.3pp'},
   {icon:'\u{1F4B1}',color:'var(--purple)',bg:'var(--purple-dim)',title:'Currencies & Capital Flows',desc:'Emerging market currencies weakening sharply. Indian rupee (-2.3%), Turkish lira (-1.3%), South African rand (-7.0%) under pressure. Flight to USD and gold. Central banks may be forced to hike rates despite slowing growth.',ml:'INR depreciation',mv:'-2.3%'},
   {icon:'\u{1F6A2}',color:'var(--blue)',bg:'var(--blue-dim)',title:'Trade & Supply Chains',desc:'Hormuz transits collapsed 95% (130 to 6/day). Global merchandise trade growth halved. Shipping insurance premiums up 400%. Plastics and petrochemical chains disrupted globally.',ml:'Shipping collapse',mv:'-95%'},
-  {icon:'\u{1F3E0}',color:'var(--green)',bg:'var(--green-dim)',title:'Household Welfare',desc:'Average US household facing ~$2,340/yr extra cost. Indian households ~$1,180/yr (much larger relative to income at $9,800 PPP). Energy poverty risk rising in South Asia and Sub-Saharan Africa.',ml:'US household cost',mv:'$2,340/yr'},
+  {icon:'\u{1F3E0}',color:'var(--green)',bg:'var(--green-dim)',title:'Household Welfare',desc:'At peak ($126/bbl), US households faced ~$2,400/yr in extra costs. At current ceasefire price ($95/bbl), that eases to ~$1,472/yr. Indian households bear ~$832/yr — a far larger burden relative to income ($9,800 PPP). Energy poverty risk rising in South Asia and Sub-Saharan Africa.',ml:'US household cost (current)',mv:'$1,472/yr'},
 ];
 
 const methodCritique = [
@@ -751,15 +751,18 @@ Chart.defaults.color = '#8888aa';
 Chart.defaults.borderColor = '#2a2a4a';
 Chart.defaults.font.family = "'Inter', sans-serif";
 
-// Oil Price Chart
-new Chart(document.getElementById('oilChart'), {
+// Oil Price Chart — data loaded dynamically from oil_price_history.json
+// oilPriceData is used as fallback if fetch fails
+var oilSeriesData = oilPriceData; // will be replaced by live fetch
+
+var oilChart = new Chart(document.getElementById('oilChart'), {
   type: 'line',
   data: {
-    labels: oilPriceData.map(d => d.date),
+    labels: oilPriceData.map(function(d){ return d.date; }),
     datasets: [
       {
         label: 'Brent Crude',
-        data: oilPriceData.map(d => d.brent),
+        data: oilPriceData.map(function(d){ return d.brent; }),
         borderColor: '#ff4757',
         backgroundColor: 'rgba(255,71,87,0.15)',
         fill: true,
@@ -770,7 +773,7 @@ new Chart(document.getElementById('oilChart'), {
       },
       {
         label: 'WTI',
-        data: oilPriceData.map(d => d.wti),
+        data: oilPriceData.map(function(d){ return d.wti; }),
         borderColor: '#ff8c42',
         backgroundColor: 'rgba(255,140,66,0.08)',
         fill: true,
@@ -795,7 +798,7 @@ new Chart(document.getElementById('oilChart'), {
           label: function(ctx) { return ctx.dataset.label + ': $' + ctx.parsed.y + '/bbl'; },
           afterBody: function(tooltipItems) {
             var idx = tooltipItems[0].dataIndex;
-            var ev = oilPriceData[idx].event;
+            var ev = oilSeriesData[idx] && oilSeriesData[idx].event;
             return ev ? ['\n\u26A0 ' + ev] : [];
           }
         }
@@ -812,6 +815,33 @@ new Chart(document.getElementById('oilChart'), {
     }
   }
 });
+
+// Fetch live oil price history and update chart
+(function loadOilHistory() {
+  fetch('data/processed/oil_price_history.json?t=' + Date.now())
+    .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function(json) {
+      if (!json || !Array.isArray(json.series) || json.series.length < 5) return;
+      oilSeriesData = json.series;
+      oilChart.data.labels                 = json.series.map(function(d){ return d.date; });
+      oilChart.data.datasets[0].data       = json.series.map(function(d){ return d.brent; });
+      oilChart.data.datasets[1].data       = json.series.map(function(d){ return d.wti; });
+      // Expand Y axis to fit data range
+      var allPrices = json.series.flatMap(function(d){ return [d.brent, d.wti]; });
+      var minP = Math.floor(Math.min.apply(null, allPrices) / 10) * 10 - 5;
+      var maxP = Math.ceil(Math.max.apply(null, allPrices)  / 10) * 10 + 5;
+      oilChart.options.scales.y.min = Math.min(minP, 60);
+      oilChart.options.scales.y.max = Math.max(maxP, 130);
+      oilChart.update();
+      // Update subtitle with latest date
+      var last = json.series[json.series.length - 1];
+      var subEl = document.getElementById('oilChartSub');
+      if (subEl && last) {
+        subEl.textContent = 'Brent Crude & WTI spot prices (USD/barrel) \u2014 Feb 27 to ' + last.date + ', 2026';
+      }
+    })
+    .catch(function() { /* keep hardcoded fallback */ });
+})();
 
 // Inflation Chart
 new Chart(document.getElementById('inflChart'), {

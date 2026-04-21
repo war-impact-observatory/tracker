@@ -1,8 +1,8 @@
 {
   "generated_at": "2026-04-08T04:44:40.342812Z",
-  "brent_price": 121.88,
+  "brent_price": 95.0,
   "brent_baseline": 70.0,
-  "oil_change_pct": 74.1,
+  "oil_change_pct": 35.7,
   "summary": {
     "total_countries": 29,
     "critical_countries": 13,
@@ -19,9 +19,9 @@
       "foodUp": 8,
       "severity": "high",
       "ffShare": 18,
-      "fuelUp": 30.6,
+      "fuelUp": 14.8,
       "currencyChg": -0.0,
-      "householdCost": 2340
+      "householdCost": 1472
     },
     {
       "country": "China",

@@ -1,15 +1,16 @@
 """
 Generate data/processed/country_data.json — the live data file consumed by the dashboard.
 
+Also generates data/processed/oil_price_history.json — the full Brent/WTI timeline used
+by the oil price chart (dynamically fetched, replaces hardcoded chart data in index.html).
+
 Merges:
   data/baseline/countries.json    — research-based fixed values (inflImpact, gdpHit, etc.)
   data/processed/computed_metrics.json — daily computed values (fuelUp, currencyChg, householdCost)
 
 Output:
   data/processed/country_data.json
-
-The dashboard (index.html) fetches this file on load and updates the hardcoded fallback data.
-If this file is missing or stale, the dashboard falls back to its embedded data silently.
+  data/processed/oil_price_history.json
 """
 
 import json
@@ -34,6 +35,70 @@ def round1(x):
         return round(float(x), 1)
     except (TypeError, ValueError):
         return x
+
+
+def generate_oil_price_history():
+    """
+    Build data/processed/oil_price_history.json from:
+      - Hardcoded pre-history series (Feb 27 – Apr 6, before daily snapshots began)
+      - data/history/YYYY-MM-DD.json files for Apr 7 onwards
+    WTI is approximated as Brent − 5.
+    """
+    PRE_HISTORY = [
+        {"date": "Feb 27", "iso": "2026-02-27", "brent": 70,  "wti": 65,  "event": "Pre-conflict baseline ($70)"},
+        {"date": "Feb 28", "iso": "2026-02-28", "brent": 80,  "wti": 75,  "event": "US-Israel strikes begin"},
+        {"date": "Mar 1",  "iso": "2026-03-01", "brent": 82,  "wti": 77},
+        {"date": "Mar 4",  "iso": "2026-03-04", "brent": 91,  "wti": 86,  "event": "Hormuz closure announced"},
+        {"date": "Mar 7",  "iso": "2026-03-07", "brent": 98,  "wti": 93},
+        {"date": "Mar 8",  "iso": "2026-03-08", "brent": 103, "wti": 98,  "event": "Brent crosses $100"},
+        {"date": "Mar 10", "iso": "2026-03-10", "brent": 108, "wti": 102, "event": "Gulf production −6.7M bpd"},
+        {"date": "Mar 12", "iso": "2026-03-12", "brent": 115, "wti": 108, "event": "Production −10M bpd (IEA)"},
+        {"date": "Mar 15", "iso": "2026-03-15", "brent": 119, "wti": 112},
+        {"date": "Mar 19", "iso": "2026-03-19", "brent": 126, "wti": 118, "event": "Brent peak — $126/bbl"},
+        {"date": "Mar 23", "iso": "2026-03-23", "brent": 104, "wti": 97,  "event": "Trump 5-day pause"},
+        {"date": "Mar 25", "iso": "2026-03-25", "brent": 109, "wti": 102},
+        {"date": "Mar 30", "iso": "2026-03-30", "brent": 116, "wti": 108, "event": "US gas hits $4/gal"},
+        {"date": "Apr 2",  "iso": "2026-04-02", "brent": 112, "wti": 105},
+    ]
+
+    EVENTS = {
+        "2026-04-07": "Pre-ceasefire high",
+        "2026-04-08": "US-Iran ceasefire — Brent ↓$31",
+    }
+    # Manual price corrections: history snapshots that captured wrong API values
+    # Format: "YYYY-MM-DD" -> correct_brent_price
+    PRICE_CORRECTIONS = {
+        "2026-04-08": 95.0,  # ceasefire day — daily snapshot ran before override was in place
+    }
+
+    series = list(PRE_HISTORY)
+
+    # Append daily history snapshots (sorted by date)
+    history_files = sorted(HISTORY_DIR.glob("2026-*.json"))
+    for hf in history_files:
+        iso = hf.stem   # e.g. "2026-04-07"
+        data = load_json(hf)
+        if not data or "brent_price" not in data:
+            continue
+        brent = round(PRICE_CORRECTIONS.get(iso, data["brent_price"]), 1)
+        wti   = round(brent - 5, 1)
+        # Format display date: "Apr 7"
+        from datetime import date as _date
+        dt = _date.fromisoformat(iso)
+        display = dt.strftime("%b %-d")   # "Apr 7" on Linux/Mac; use %#d on Windows
+        point = {"date": display, "iso": iso, "brent": brent, "wti": wti}
+        if iso in EVENTS:
+            point["event"] = EVENTS[iso]
+        series.append(point)
+
+    out = {
+        "generated_at": datetime.utcnow().isoformat() + "Z",
+        "series": series,
+    }
+    out_path = PROCESSED_DIR / "oil_price_history.json"
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(out, f, indent=2, ensure_ascii=False)
+    print(f"  Oil price history: {len(series)} points → {out_path}")
 
 
 def main():
@@ -120,6 +185,9 @@ def main():
     print(f"  Countries: {len(countries_out)}  |  Critical: {critical_count}")
     print(f"  Brent: ${brent_price}/bbl (+{output['oil_change_pct']}% vs baseline)")
     print(f"  Generated at: {output['generated_at']}")
+
+    # Also regenerate the oil price history (chart timeline)
+    generate_oil_price_history()
 
 
 if __name__ == "__main__":

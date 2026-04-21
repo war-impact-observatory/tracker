@@ -1,7 +1,7 @@
 {
-  "brent_usd": 95.0,
-  "date": "2026-04-08",
-  "reason": "US-Iran 2-week ceasefire Apr 8 \u2014 Brent settled ~$95/bbl. APIs lag or return wrong series post-ceasefire.",
-  "set_at": "2026-04-10T04:39:25.766949+00:00",
-  "set_by": "manual \u2014 pipeline sanity override"
+  "brent_usd": 90.0,
+  "date": "2026-04-21",
+  "reason": "Post-ceasefire stabilization: Brent drifted $95→$90 Apr 8-21 as partial Hormuz transit resumed. FRED API returns real-world 2026 price (~$67) which fails sanity check vs simulation baseline — override required while conflict simulation is active.",
+  "set_at": "2026-04-21T18:00:00+00:00",
+  "set_by": "manual — simulation override (freeze_previous chain fix)"
 }

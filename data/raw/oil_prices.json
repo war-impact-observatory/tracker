@@ -1,6 +1,6 @@
 {
-  "brent_usd": 95.0,
-  "date": "2026-04-20",
-  "source": "FROZEN \u2014 API fetch failed or failed sanity check; using previous day",
-  "fetched_at": "2026-04-21T10:51:26.581784Z"
+  "brent_usd": 90.0,
+  "date": "2026-04-21",
+  "source": "MANUAL_OVERRIDE \u2014 Post-ceasefire stabilization: Brent drifted $95\u2192$90 Apr 8-21 as partial Hormuz transit resumed. FRED API returns real-world 2026 price (~$67) which fails sanity check vs simulation baseline \u2014 override required while conflict simulation is active.",
+  "fetched_at": "2026-04-21T17:55:57.277164Z"
 }

@@ -1,8 +1,8 @@
 {
   "generated_at": "2026-04-21T17:39:01.176547Z",
-  "brent_price": 95.0,
+  "brent_price": 90.0,
   "brent_baseline": 70.0,
-  "oil_change_pct": 35.7,
+  "oil_change_pct": 28.6,
   "summary": {
     "total_countries": 29,
     "critical_countries": 13,
@@ -19,9 +19,9 @@
       "foodUp": 8,
       "severity": "high",
       "ffShare": 18,
-      "fuelUp": 14.8,
+      "fuelUp": 11.8,
       "currencyChg": -0.0,
-      "householdCost": 1472
+      "householdCost": 1307
     },
     {
       "country": "China",
@@ -47,9 +47,9 @@
       "foodUp": 18,
       "severity": "critical",
       "ffShare": 48,
-      "fuelUp": 17.2,
+      "fuelUp": 13.8,
       "currencyChg": -1.4,
-      "householdCost": 832
+      "householdCost": 768
     },
     {
       "country": "Japan",
@@ -299,9 +299,9 @@
       "foodUp": 60,
       "severity": "critical",
       "ffShare": 55,
-      "fuelUp": 41.8,
+      "fuelUp": 33.5,
       "currencyChg": -45.0,
-      "householdCost": 4871,
+      "householdCost": 4565,
       "participant": true
     },
     {

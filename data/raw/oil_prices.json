@@ -2,5 +2,5 @@
   "brent_usd": 90.0,
   "date": "2026-04-21",
   "source": "MANUAL_OVERRIDE \u2014 Post-ceasefire stabilization: Brent drifted $95\u2192$90 Apr 8-21 as partial Hormuz transit resumed. FRED API returns real-world 2026 price (~$67) which fails sanity check vs simulation baseline \u2014 override required while conflict simulation is active.",
-  "fetched_at": "2026-04-22T10:48:28.392323Z"
+  "fetched_at": "2026-04-23T10:54:56.969931Z"
 }

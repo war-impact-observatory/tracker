@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-04-27T12:09:13.183361Z",
+  "generated_at": "2026-04-28T12:13:55.306999Z",
   "brent_price": 103.4,
   "brent_baseline": 70.0,
   "oil_change_pct": 47.7,
-  "eur_usd": 1.1712,
+  "eur_usd": 1.1749,
   "countries": {
     "United States": {
       "fuelUp": 19.7,
@@ -12,17 +12,17 @@
     },
     "China": {
       "fuelUp": 14.5,
-      "currencyChg": 0.3,
+      "currencyChg": 0.5,
       "householdCost": 1095
     },
     "India": {
       "fuelUp": 23.0,
-      "currencyChg": -3.6,
+      "currencyChg": -3.5,
       "householdCost": 941
     },
     "Japan": {
       "fuelUp": 18.4,
-      "currencyChg": -2.0,
+      "currencyChg": -1.9,
       "householdCost": 1408
     },
     "Germany": {
@@ -32,7 +32,7 @@
     },
     "United Kingdom": {
       "fuelUp": 17.1,
-      "currencyChg": -0.2,
+      "currencyChg": 0.4,
       "householdCost": 1425
     },
     "France": {
@@ -42,22 +42,22 @@
     },
     "Brazil": {
       "fuelUp": 11.8,
-      "currencyChg": 2.6,
+      "currencyChg": 3.3,
       "householdCost": 662
     },
     "Canada": {
       "fuelUp": 13.2,
-      "currencyChg": -0.0,
+      "currencyChg": 0.6,
       "householdCost": 925
     },
     "Australia": {
       "fuelUp": 16.4,
-      "currencyChg": 0.5,
+      "currencyChg": 1.2,
       "householdCost": 1282
     },
     "South Korea": {
       "fuelUp": 19.7,
-      "currencyChg": -3.2,
+      "currencyChg": -2.8,
       "householdCost": 1904
     },
     "Italy": {
@@ -67,17 +67,17 @@
     },
     "Mexico": {
       "fuelUp": 13.2,
-      "currencyChg": -1.2,
+      "currencyChg": -1.0,
       "householdCost": 1149
     },
     "Indonesia": {
       "fuelUp": 18.4,
-      "currencyChg": -2.7,
+      "currencyChg": -2.5,
       "householdCost": 1289
     },
     "Turkey": {
       "fuelUp": 26.3,
-      "currencyChg": -2.6,
+      "currencyChg": -2.5,
       "householdCost": 3370
     },
     "Saudi Arabia": {
@@ -92,7 +92,7 @@
     },
     "South Africa": {
       "fuelUp": 21.0,
-      "currencyChg": -4.2,
+      "currencyChg": -3.7,
       "householdCost": 1290
     },
     "Russia": {

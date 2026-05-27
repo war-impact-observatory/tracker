@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-05-26T10:12:42.226290Z",
+  "generated_at": "2026-05-27T10:10:12.505224Z",
   "brent_price": 116.73,
   "brent_baseline": 70.0,
   "oil_change_pct": 66.8,
-  "eur_usd": 1.1643,
+  "eur_usd": 1.1634,
   "countries": {
     "United States": {
       "fuelUp": 27.6,
@@ -17,12 +17,12 @@
     },
     "India": {
       "fuelUp": 32.2,
-      "currencyChg": -4.7,
+      "currencyChg": -5.2,
       "householdCost": 1114
     },
     "Japan": {
       "fuelUp": 25.8,
-      "currencyChg": -1.7,
+      "currencyChg": -1.9,
       "householdCost": 1720
     },
     "Germany": {
@@ -32,7 +32,7 @@
     },
     "United Kingdom": {
       "fuelUp": 23.9,
-      "currencyChg": -0.1,
+      "currencyChg": -0.3,
       "householdCost": 1713
     },
     "France": {
@@ -42,7 +42,7 @@
     },
     "Brazil": {
       "fuelUp": 16.6,
-      "currencyChg": 2.6,
+      "currencyChg": 2.3,
       "householdCost": 788
     },
     "Canada": {
@@ -52,12 +52,12 @@
     },
     "Australia": {
       "fuelUp": 23.0,
-      "currencyChg": 0.9,
+      "currencyChg": 0.8,
       "householdCost": 1580
     },
     "South Korea": {
       "fuelUp": 27.6,
-      "currencyChg": -5.7,
+      "currencyChg": -5.1,
       "householdCost": 2288
     },
     "Italy": {
@@ -67,17 +67,17 @@
     },
     "Mexico": {
       "fuelUp": 18.4,
-      "currencyChg": -0.5,
+      "currencyChg": -0.6,
       "householdCost": 1324
     },
     "Indonesia": {
       "fuelUp": 25.8,
-      "currencyChg": -5.6,
+      "currencyChg": -6.2,
       "householdCost": 1514
     },
     "Turkey": {
       "fuelUp": 36.8,
-      "currencyChg": -4.1,
+      "currencyChg": -4.6,
       "householdCost": 3967
     },
     "Saudi Arabia": {
@@ -92,7 +92,7 @@
     },
     "South Africa": {
       "fuelUp": 29.4,
-      "currencyChg": -2.7,
+      "currencyChg": -2.9,
       "householdCost": 1516
     },
     "Russia": {
@@ -112,7 +112,7 @@
     },
     "Israel": {
       "fuelUp": 35.0,
-      "currencyChg": 7.3,
+      "currencyChg": 8.3,
       "householdCost": 2368
     },
     "Iraq": {

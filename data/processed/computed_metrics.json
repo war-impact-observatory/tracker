@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-06-01T11:50:36.930298Z",
+  "generated_at": "2026-06-02T10:49:11.626666Z",
   "brent_price": 102.75,
   "brent_baseline": 70.0,
   "oil_change_pct": 46.8,
-  "eur_usd": 1.1644,
+  "eur_usd": 1.1646,
   "countries": {
     "United States": {
       "fuelUp": 19.3,
@@ -22,7 +22,7 @@
     },
     "Japan": {
       "fuelUp": 18.1,
-      "currencyChg": -1.9,
+      "currencyChg": -2.1,
       "householdCost": 1395
     },
     "Germany": {
@@ -32,7 +32,7 @@
     },
     "United Kingdom": {
       "fuelUp": 16.7,
-      "currencyChg": -0.7,
+      "currencyChg": -0.4,
       "householdCost": 1408
     },
     "France": {
@@ -42,12 +42,12 @@
     },
     "Brazil": {
       "fuelUp": 11.6,
-      "currencyChg": 1.8,
+      "currencyChg": 2.2,
       "householdCost": 657
     },
     "Canada": {
       "fuelUp": 12.9,
-      "currencyChg": -0.9,
+      "currencyChg": -1.1,
       "householdCost": 913
     },
     "Australia": {
@@ -57,7 +57,7 @@
     },
     "South Korea": {
       "fuelUp": 19.3,
-      "currencyChg": -5.2,
+      "currencyChg": -5.4,
       "householdCost": 1885
     },
     "Italy": {
@@ -72,7 +72,7 @@
     },
     "Indonesia": {
       "fuelUp": 18.1,
-      "currencyChg": -6.1,
+      "currencyChg": -6.2,
       "householdCost": 1280
     },
     "Turkey": {
@@ -92,7 +92,7 @@
     },
     "South Africa": {
       "fuelUp": 20.6,
-      "currencyChg": -2.1,
+      "currencyChg": -2.3,
       "householdCost": 1279
     },
     "Russia": {
@@ -112,7 +112,7 @@
     },
     "Israel": {
       "fuelUp": 24.5,
-      "currencyChg": 9.9,
+      "currencyChg": 9.7,
       "householdCost": 1936
     },
     "Iraq": {

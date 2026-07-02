@@ -1,154 +1,154 @@
 {
-  "generated_at": "2026-07-01T10:03:46.561435Z",
-  "brent_price": 76.49,
+  "generated_at": "2026-07-02T09:26:25.422209Z",
+  "brent_price": 71.59,
   "brent_baseline": 70.0,
-  "oil_change_pct": 9.3,
-  "eur_usd": 1.1394,
+  "oil_change_pct": 2.3,
+  "eur_usd": 1.1383,
   "countries": {
     "United States": {
-      "fuelUp": 3.8,
+      "fuelUp": 0.9,
       "currencyChg": -0.0,
-      "householdCost": 868
+      "householdCost": 709
     },
     "China": {
-      "fuelUp": 2.8,
-      "currencyChg": 1.0,
-      "householdCost": 701
+      "fuelUp": 0.7,
+      "currencyChg": 0.9,
+      "householdCost": 630
     },
     "India": {
-      "fuelUp": 4.5,
-      "currencyChg": -4.0,
-      "householdCost": 593
+      "fuelUp": 1.1,
+      "currencyChg": -4.7,
+      "householdCost": 529
     },
     "Japan": {
-      "fuelUp": 3.6,
-      "currencyChg": -4.0,
-      "householdCost": 784
+      "fuelUp": 0.9,
+      "currencyChg": -4.1,
+      "householdCost": 670
     },
     "Germany": {
-      "fuelUp": 4.1,
+      "fuelUp": 1.0,
       "currencyChg": 0.0,
-      "householdCost": 1269
+      "householdCost": 1112
     },
     "United Kingdom": {
-      "fuelUp": 3.3,
-      "currencyChg": -2.2,
-      "householdCost": 840
+      "fuelUp": 0.8,
+      "currencyChg": -2.1,
+      "householdCost": 734
     },
     "France": {
-      "fuelUp": 3.1,
+      "fuelUp": 0.8,
       "currencyChg": 0.0,
-      "householdCost": 859
+      "householdCost": 750
     },
     "Brazil": {
-      "fuelUp": 2.3,
-      "currencyChg": -0.8,
-      "householdCost": 414
+      "fuelUp": 0.6,
+      "currencyChg": -1.0,
+      "householdCost": 369
     },
     "Canada": {
-      "fuelUp": 2.6,
-      "currencyChg": -4.1,
-      "householdCost": 511
+      "fuelUp": 0.6,
+      "currencyChg": -4.0,
+      "householdCost": 433
     },
     "Australia": {
-      "fuelUp": 3.2,
-      "currencyChg": -3.2,
-      "householdCost": 686
+      "fuelUp": 0.8,
+      "currencyChg": -3.1,
+      "householdCost": 578
     },
     "South Korea": {
-      "fuelUp": 3.8,
-      "currencyChg": -8.3,
-      "householdCost": 1132
+      "fuelUp": 0.9,
+      "currencyChg": -8.8,
+      "householdCost": 991
     },
     "Italy": {
-      "fuelUp": 3.7,
+      "fuelUp": 0.9,
       "currencyChg": 0.0,
-      "householdCost": 1020
+      "householdCost": 889
     },
     "Mexico": {
-      "fuelUp": 2.6,
-      "currencyChg": -1.7,
-      "householdCost": 793
+      "fuelUp": 0.6,
+      "currencyChg": -2.1,
+      "householdCost": 726
     },
     "Indonesia": {
-      "fuelUp": 3.6,
-      "currencyChg": -6.6,
-      "householdCost": 839
+      "fuelUp": 0.9,
+      "currencyChg": -6.9,
+      "householdCost": 757
     },
     "Turkey": {
-      "fuelUp": 5.1,
+      "fuelUp": 1.3,
       "currencyChg": -6.3,
-      "householdCost": 2165
+      "householdCost": 1949
     },
     "Saudi Arabia": {
-      "fuelUp": 1.3,
+      "fuelUp": 0.3,
       "currencyChg": 0.1,
-      "householdCost": 1850
+      "householdCost": 1791
     },
     "Argentina": {
-      "fuelUp": 4.5,
+      "fuelUp": 1.1,
       "currencyChg": 0.5,
-      "householdCost": 1821
+      "householdCost": 1674
     },
     "South Africa": {
-      "fuelUp": 4.1,
-      "currencyChg": -3.0,
-      "householdCost": 836
+      "fuelUp": 1.0,
+      "currencyChg": -3.4,
+      "householdCost": 753
     },
     "Russia": {
-      "fuelUp": 1.0,
+      "fuelUp": 0.2,
       "currencyChg": -4.6,
-      "householdCost": 480
+      "householdCost": 442
     },
     "European Union": {
-      "fuelUp": 3.6,
+      "fuelUp": 0.9,
       "currencyChg": 0.0,
-      "householdCost": 960
+      "householdCost": 840
     },
     "Iran": {
-      "fuelUp": 10.9,
+      "fuelUp": 2.7,
       "currencyChg": -45.0,
-      "householdCost": 3729
+      "householdCost": 3426
     },
     "Israel": {
-      "fuelUp": 4.9,
+      "fuelUp": 1.2,
       "currencyChg": 4.4,
-      "householdCost": 1128
+      "householdCost": 976
     },
     "Iraq": {
-      "fuelUp": 7.0,
+      "fuelUp": 1.7,
       "currencyChg": -0.0,
-      "householdCost": 1937
+      "householdCost": 1799
     },
     "Qatar": {
-      "fuelUp": 1.5,
+      "fuelUp": 0.4,
       "currencyChg": -0.0,
-      "householdCost": 3519
+      "householdCost": 3420
     },
     "Kuwait": {
-      "fuelUp": 1.9,
+      "fuelUp": 0.5,
       "currencyChg": 0.0,
-      "householdCost": 2229
+      "householdCost": 2158
     },
     "UAE": {
-      "fuelUp": 1.3,
+      "fuelUp": 0.3,
       "currencyChg": 0.0,
-      "householdCost": 2049
+      "householdCost": 1989
     },
     "Lebanon": {
-      "fuelUp": 11.5,
+      "fuelUp": 2.8,
       "currencyChg": -18.0,
-      "householdCost": 3097
+      "householdCost": 2810
     },
     "Syria": {
-      "fuelUp": 12.1,
+      "fuelUp": 3.0,
       "currencyChg": -22.0,
-      "householdCost": 1026
+      "householdCost": 941
     },
     "Yemen": {
-      "fuelUp": 10.2,
+      "fuelUp": 2.5,
       "currencyChg": -15.0,
-      "householdCost": 380
+      "householdCost": 346
     }
   }
 }

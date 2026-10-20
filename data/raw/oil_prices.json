@@ -1,6 +1,6 @@
 {
   "brent_usd": 126.55,
-  "date": "2026-10-18",
-  "source": "FROZEN \u2014 API fetch failed or failed sanity check; using previous day",
-  "fetched_at": "2026-10-19T12:50:48.017776Z"
+  "date": "2026-10-14",
+  "source": "EIA/RBRTE",
+  "fetched_at": "2026-10-20T11:19:45.004148Z"
 }

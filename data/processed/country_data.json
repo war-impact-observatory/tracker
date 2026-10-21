@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T11:19:45.975489Z",
+  "generated_at": "2026-10-21T11:35:25.385685Z",
   "brent_price": 126.55,
   "brent_baseline": 70.0,
   "oil_change_pct": 80.8,
@@ -62,7 +62,7 @@
       "severity": "high",
       "ffShare": 22,
       "fuelUp": 31.2,
-      "currencyChg": -1.3,
+      "currencyChg": -1.2,
       "householdCost": 1947
     },
     {
@@ -90,7 +90,7 @@
       "severity": "high",
       "ffShare": 19,
       "fuelUp": 28.9,
-      "currencyChg": -1.4,
+      "currencyChg": -1.3,
       "householdCost": 1925
     },
     {
@@ -118,7 +118,7 @@
       "severity": "moderate",
       "ffShare": 35,
       "fuelUp": 20.0,
-      "currencyChg": 1.8,
+      "currencyChg": 2.2,
       "householdCost": 877
     },
     {
@@ -132,7 +132,7 @@
       "severity": "low",
       "ffShare": 17,
       "fuelUp": 22.3,
-      "currencyChg": -2.9,
+      "currencyChg": -2.7,
       "householdCost": 1280
     },
     {
@@ -160,7 +160,7 @@
       "severity": "critical",
       "ffShare": 24,
       "fuelUp": 33.4,
-      "currencyChg": 7.1,
+      "currencyChg": 7.3,
       "householdCost": 2570
     },
     {
@@ -188,7 +188,7 @@
       "severity": "moderate",
       "ffShare": 38,
       "fuelUp": 22.3,
-      "currencyChg": -7.6,
+      "currencyChg": -7.8,
       "householdCost": 1455
     },
     {
@@ -202,7 +202,7 @@
       "severity": "high",
       "ffShare": 50,
       "fuelUp": 31.2,
-      "currencyChg": -7.4,
+      "currencyChg": -7.1,
       "householdCost": 1678
     },
     {
@@ -258,7 +258,7 @@
       "severity": "high",
       "ffShare": 42,
       "fuelUp": 35.6,
-      "currencyChg": -3.4,
+      "currencyChg": -3.7,
       "householdCost": 1683
     },
     {

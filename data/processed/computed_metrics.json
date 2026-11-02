@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-11-01T13:05:12.085875Z",
+  "generated_at": "2026-11-02T15:28:34.694409Z",
   "brent_price": 123.1,
   "brent_baseline": 70.0,
   "oil_change_pct": 75.9,
-  "eur_usd": 1.1172,
+  "eur_usd": 1.1216,
   "countries": {
     "United States": {
       "fuelUp": 31.3,
@@ -17,12 +17,12 @@
     },
     "India": {
       "fuelUp": 36.6,
-      "currencyChg": -4.4,
+      "currencyChg": -4.3,
       "householdCost": 1197
     },
     "Japan": {
       "fuelUp": 29.3,
-      "currencyChg": -0.6,
+      "currencyChg": -1.1,
       "householdCost": 1867
     },
     "Germany": {
@@ -32,7 +32,7 @@
     },
     "United Kingdom": {
       "fuelUp": 27.2,
-      "currencyChg": -0.9,
+      "currencyChg": -0.7,
       "householdCost": 1853
     },
     "France": {
@@ -42,22 +42,22 @@
     },
     "Brazil": {
       "fuelUp": 18.8,
-      "currencyChg": -5.8,
+      "currencyChg": -5.9,
       "householdCost": 846
     },
     "Canada": {
       "fuelUp": 20.9,
-      "currencyChg": -2.1,
+      "currencyChg": -2.2,
       "householdCost": 1226
     },
     "Australia": {
       "fuelUp": 26.1,
-      "currencyChg": -1.2,
+      "currencyChg": -1.4,
       "householdCost": 1720
     },
     "South Korea": {
       "fuelUp": 31.3,
-      "currencyChg": 6.7,
+      "currencyChg": 6.2,
       "householdCost": 2468
     },
     "Italy": {
@@ -67,12 +67,12 @@
     },
     "Mexico": {
       "fuelUp": 20.9,
-      "currencyChg": -10.1,
+      "currencyChg": -9.0,
       "householdCost": 1408
     },
     "Indonesia": {
       "fuelUp": 29.3,
-      "currencyChg": -8.1,
+      "currencyChg": -8.0,
       "householdCost": 1620
     },
     "Turkey": {
@@ -92,7 +92,7 @@
     },
     "South Africa": {
       "fuelUp": 33.5,
-      "currencyChg": -5.0,
+      "currencyChg": -4.7,
       "householdCost": 1626
     },
     "Russia": {
@@ -112,7 +112,7 @@
     },
     "Israel": {
       "fuelUp": 39.7,
-      "currencyChg": -0.4,
+      "currencyChg": -0.7,
       "householdCost": 2562
     },
     "Iraq": {

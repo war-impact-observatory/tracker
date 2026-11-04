@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-03T13:58:42.456059Z",
+  "generated_at": "2026-11-04T14:14:43.669399Z",
   "brent_price": 123.1,
   "brent_baseline": 70.0,
   "oil_change_pct": 75.9,
@@ -34,7 +34,7 @@
       "severity": "high",
       "ffShare": 36,
       "fuelUp": 23.0,
-      "currencyChg": 3.0,
+      "currencyChg": 2.7,
       "householdCost": 1382
     },
     {
@@ -48,7 +48,7 @@
       "severity": "critical",
       "ffShare": 48,
       "fuelUp": 36.6,
-      "currencyChg": -4.3,
+      "currencyChg": -4.1,
       "householdCost": 1197
     },
     {
@@ -62,7 +62,7 @@
       "severity": "high",
       "ffShare": 22,
       "fuelUp": 29.3,
-      "currencyChg": -1.1,
+      "currencyChg": -1.3,
       "householdCost": 1867
     },
     {
@@ -90,7 +90,7 @@
       "severity": "high",
       "ffShare": 19,
       "fuelUp": 27.2,
-      "currencyChg": -0.7,
+      "currencyChg": -0.8,
       "householdCost": 1853
     },
     {
@@ -118,7 +118,7 @@
       "severity": "moderate",
       "ffShare": 35,
       "fuelUp": 18.8,
-      "currencyChg": -5.9,
+      "currencyChg": -6.9,
       "householdCost": 846
     },
     {
@@ -146,7 +146,7 @@
       "severity": "moderate",
       "ffShare": 19,
       "fuelUp": 26.1,
-      "currencyChg": -1.4,
+      "currencyChg": -1.8,
       "householdCost": 1720
     },
     {
@@ -160,7 +160,7 @@
       "severity": "critical",
       "ffShare": 24,
       "fuelUp": 31.3,
-      "currencyChg": 6.2,
+      "currencyChg": 6.1,
       "householdCost": 2468
     },
     {
@@ -188,7 +188,7 @@
       "severity": "moderate",
       "ffShare": 38,
       "fuelUp": 20.9,
-      "currencyChg": -9.0,
+      "currencyChg": -8.3,
       "householdCost": 1408
     },
     {
@@ -216,7 +216,7 @@
       "severity": "critical",
       "ffShare": 37,
       "fuelUp": 41.8,
-      "currencyChg": -13.8,
+      "currencyChg": -13.9,
       "householdCost": 4251
     },
     {
@@ -315,7 +315,7 @@
       "severity": "critical",
       "ffShare": 22,
       "fuelUp": 39.7,
-      "currencyChg": -0.7,
+      "currencyChg": -1.3,
       "householdCost": 2562,
       "participant": true
     },

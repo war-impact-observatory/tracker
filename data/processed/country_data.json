@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-11-12T14:58:57.383978Z",
-  "brent_price": 107.03,
+  "generated_at": "2026-11-13T14:24:41.503137Z",
+  "brent_price": 92.14,
   "brent_baseline": 70.0,
-  "oil_change_pct": 52.9,
+  "oil_change_pct": 31.6,
   "summary": {
     "total_countries": 29,
     "critical_countries": 13,
@@ -19,9 +19,9 @@
       "foodUp": 8,
       "severity": "high",
       "ffShare": 18,
-      "fuelUp": 21.8,
+      "fuelUp": 13.1,
       "currencyChg": -0.0,
-      "householdCost": 1857
+      "householdCost": 1379
     },
     {
       "country": "China",
@@ -33,9 +33,9 @@
       "foodUp": 12,
       "severity": "high",
       "ffShare": 36,
-      "fuelUp": 16.0,
+      "fuelUp": 9.6,
       "currencyChg": 2.7,
-      "householdCost": 1146
+      "householdCost": 930
     },
     {
       "country": "India",
@@ -47,9 +47,9 @@
       "foodUp": 18,
       "severity": "critical",
       "ffShare": 48,
-      "fuelUp": 25.5,
+      "fuelUp": 15.2,
       "currencyChg": -3.4,
-      "householdCost": 988
+      "householdCost": 794
     },
     {
       "country": "Japan",
@@ -61,9 +61,9 @@
       "foodUp": 10,
       "severity": "high",
       "ffShare": 22,
-      "fuelUp": 20.4,
+      "fuelUp": 12.2,
       "currencyChg": -2.2,
-      "householdCost": 1492
+      "householdCost": 1147
     },
     {
       "country": "Germany",
@@ -75,9 +75,9 @@
       "foodUp": 14,
       "severity": "high",
       "ffShare": 20,
-      "fuelUp": 23.3,
+      "fuelUp": 13.9,
       "currencyChg": 0.0,
-      "householdCost": 2240
+      "householdCost": 1765
     },
     {
       "country": "United Kingdom",
@@ -89,9 +89,9 @@
       "foodUp": 11,
       "severity": "high",
       "ffShare": 19,
-      "fuelUp": 18.9,
+      "fuelUp": 11.3,
       "currencyChg": -2.0,
-      "householdCost": 1501
+      "householdCost": 1179
     },
     {
       "country": "France",
@@ -103,9 +103,9 @@
       "foodUp": 10,
       "severity": "moderate",
       "ffShare": 21,
-      "fuelUp": 17.5,
+      "fuelUp": 10.5,
       "currencyChg": 0.0,
-      "householdCost": 1542
+      "householdCost": 1210
     },
     {
       "country": "Brazil",
@@ -117,9 +117,9 @@
       "foodUp": 9,
       "severity": "moderate",
       "ffShare": 35,
-      "fuelUp": 13.1,
+      "fuelUp": 7.8,
       "currencyChg": -9.3,
-      "householdCost": 696
+      "householdCost": 558
     },
     {
       "country": "Canada",
@@ -131,9 +131,9 @@
       "foodUp": 7,
       "severity": "low",
       "ffShare": 17,
-      "fuelUp": 14.6,
+      "fuelUp": 8.7,
       "currencyChg": -4.2,
-      "householdCost": 980
+      "householdCost": 749
     },
     {
       "country": "Australia",
@@ -145,9 +145,9 @@
       "foodUp": 8,
       "severity": "moderate",
       "ffShare": 19,
-      "fuelUp": 18.2,
+      "fuelUp": 10.9,
       "currencyChg": -4.2,
-      "householdCost": 1363
+      "householdCost": 1034
     },
     {
       "country": "South Korea",
@@ -159,9 +159,9 @@
       "foodUp": 13,
       "severity": "critical",
       "ffShare": 24,
-      "fuelUp": 21.8,
+      "fuelUp": 13.1,
       "currencyChg": 6.8,
-      "householdCost": 2006
+      "householdCost": 1584
     },
     {
       "country": "Italy",
@@ -173,9 +173,9 @@
       "foodUp": 12,
       "severity": "high",
       "ffShare": 23,
-      "fuelUp": 21.2,
+      "fuelUp": 12.7,
       "currencyChg": 0.0,
-      "householdCost": 1843
+      "householdCost": 1443
     },
     {
       "country": "Mexico",
@@ -187,9 +187,9 @@
       "foodUp": 14,
       "severity": "moderate",
       "ffShare": 38,
-      "fuelUp": 14.6,
+      "fuelUp": 8.7,
       "currencyChg": -8.8,
-      "householdCost": 1196
+      "householdCost": 998
     },
     {
       "country": "Indonesia",
@@ -201,9 +201,9 @@
       "foodUp": 16,
       "severity": "high",
       "ffShare": 50,
-      "fuelUp": 20.4,
+      "fuelUp": 12.2,
       "currencyChg": -8.7,
-      "householdCost": 1350
+      "householdCost": 1100
     },
     {
       "country": "Turkey",
@@ -215,9 +215,9 @@
       "foodUp": 22,
       "severity": "critical",
       "ffShare": 37,
-      "fuelUp": 29.1,
+      "fuelUp": 17.4,
       "currencyChg": -14.5,
-      "householdCost": 3529
+      "householdCost": 2864
     },
     {
       "country": "Saudi Arabia",
@@ -229,9 +229,9 @@
       "foodUp": 20,
       "severity": "critical",
       "ffShare": 25,
-      "fuelUp": 7.3,
+      "fuelUp": 4.4,
       "currencyChg": 0.1,
-      "householdCost": 2204
+      "householdCost": 2033
     },
     {
       "country": "Argentina",
@@ -243,9 +243,9 @@
       "foodUp": 25,
       "severity": "high",
       "ffShare": 40,
-      "fuelUp": 25.5,
+      "fuelUp": 15.2,
       "currencyChg": 0.5,
-      "householdCost": 2732
+      "householdCost": 2285
     },
     {
       "country": "South Africa",
@@ -257,9 +257,9 @@
       "foodUp": 18,
       "severity": "high",
       "ffShare": 42,
-      "fuelUp": 23.3,
+      "fuelUp": 13.9,
       "currencyChg": -5.2,
-      "householdCost": 1352
+      "householdCost": 1099
     },
     {
       "country": "Russia",
@@ -271,9 +271,9 @@
       "foodUp": 6,
       "severity": "low",
       "ffShare": 33,
-      "fuelUp": 5.8,
+      "fuelUp": 3.5,
       "currencyChg": -4.6,
-      "householdCost": 711
+      "householdCost": 601
     },
     {
       "country": "European Union",
@@ -285,9 +285,9 @@
       "foodUp": 12,
       "severity": "high",
       "ffShare": 22,
-      "fuelUp": 20.4,
+      "fuelUp": 12.2,
       "currencyChg": 0.0,
-      "householdCost": 1706
+      "householdCost": 1342
     },
     {
       "country": "Iran",
@@ -299,9 +299,9 @@
       "foodUp": 60,
       "severity": "critical",
       "ffShare": 55,
-      "fuelUp": 61.9,
+      "fuelUp": 37.0,
       "currencyChg": -45.0,
-      "householdCost": 5614,
+      "householdCost": 4694,
       "participant": true
     },
     {
@@ -314,9 +314,9 @@
       "foodUp": 15,
       "severity": "critical",
       "ffShare": 22,
-      "fuelUp": 27.7,
+      "fuelUp": 16.6,
       "currencyChg": -2.8,
-      "householdCost": 2067,
+      "householdCost": 1610,
       "participant": true
     },
     {
@@ -329,9 +329,9 @@
       "foodUp": 45,
       "severity": "critical",
       "ffShare": 52,
-      "fuelUp": 40.1,
+      "fuelUp": 24.0,
       "currencyChg": -0.0,
-      "householdCost": 2798,
+      "householdCost": 2379,
       "participant": true
     },
     {
@@ -344,9 +344,9 @@
       "foodUp": 25,
       "severity": "critical",
       "ffShare": 20,
-      "fuelUp": 8.7,
+      "fuelUp": 5.2,
       "currencyChg": -0.0,
-      "householdCost": 4169,
+      "householdCost": 3853,
       "participant": true
     },
     {
@@ -359,9 +359,9 @@
       "foodUp": 28,
       "severity": "critical",
       "ffShare": 24,
-      "fuelUp": 11.0,
+      "fuelUp": 6.5,
       "currencyChg": 0.0,
-      "householdCost": 2692,
+      "householdCost": 2463,
       "participant": true
     },
     {
@@ -374,9 +374,9 @@
       "foodUp": 22,
       "severity": "critical",
       "ffShare": 19,
-      "fuelUp": 7.3,
+      "fuelUp": 4.4,
       "currencyChg": 0.0,
-      "householdCost": 2407,
+      "householdCost": 2234,
       "participant": true
     },
     {
@@ -389,9 +389,9 @@
       "foodUp": 55,
       "severity": "critical",
       "ffShare": 58,
-      "fuelUp": 65.6,
+      "fuelUp": 39.2,
       "currencyChg": -18.0,
-      "householdCost": 4879,
+      "householdCost": 4009,
       "participant": true
     },
     {
@@ -404,9 +404,9 @@
       "foodUp": 65,
       "severity": "critical",
       "ffShare": 65,
-      "fuelUp": 69.2,
+      "fuelUp": 41.4,
       "currencyChg": -22.0,
-      "householdCost": 1560,
+      "householdCost": 1300,
       "participant": true
     },
     {
@@ -419,9 +419,9 @@
       "foodUp": 50,
       "severity": "critical",
       "ffShare": 62,
-      "fuelUp": 58.3,
+      "fuelUp": 34.9,
       "currencyChg": -15.0,
-      "householdCost": 595,
+      "householdCost": 491,
       "participant": true
     }
   ]

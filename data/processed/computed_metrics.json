@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-11-17T15:50:24.969642Z",
+  "generated_at": "2026-11-18T15:29:03.193979Z",
   "brent_price": 92.14,
   "brent_baseline": 70.0,
   "oil_change_pct": 31.6,
-  "eur_usd": 1.0989,
+  "eur_usd": 1.0968,
   "countries": {
     "United States": {
       "fuelUp": 13.1,
@@ -22,7 +22,7 @@
     },
     "Japan": {
       "fuelUp": 12.2,
-      "currencyChg": -1.9,
+      "currencyChg": -2.0,
       "householdCost": 1147
     },
     "Germany": {
@@ -32,7 +32,7 @@
     },
     "United Kingdom": {
       "fuelUp": 11.3,
-      "currencyChg": -2.5,
+      "currencyChg": -2.6,
       "householdCost": 1179
     },
     "France": {
@@ -42,22 +42,22 @@
     },
     "Brazil": {
       "fuelUp": 7.8,
-      "currencyChg": -12.6,
+      "currencyChg": -13.3,
       "householdCost": 558
     },
     "Canada": {
       "fuelUp": 8.7,
-      "currencyChg": -4.5,
+      "currencyChg": -4.6,
       "householdCost": 749
     },
     "Australia": {
       "fuelUp": 10.9,
-      "currencyChg": -5.5,
+      "currencyChg": -5.6,
       "householdCost": 1034
     },
     "South Korea": {
       "fuelUp": 13.1,
-      "currencyChg": 6.7,
+      "currencyChg": 6.9,
       "householdCost": 1584
     },
     "Italy": {
@@ -67,17 +67,17 @@
     },
     "Mexico": {
       "fuelUp": 8.7,
-      "currencyChg": -7.5,
+      "currencyChg": -8.1,
       "householdCost": 998
     },
     "Indonesia": {
       "fuelUp": 12.2,
-      "currencyChg": -8.8,
+      "currencyChg": -8.7,
       "householdCost": 1100
     },
     "Turkey": {
       "fuelUp": 17.4,
-      "currencyChg": -14.8,
+      "currencyChg": -14.9,
       "householdCost": 2864
     },
     "Saudi Arabia": {
@@ -92,7 +92,7 @@
     },
     "South Africa": {
       "fuelUp": 13.9,
-      "currencyChg": -6.5,
+      "currencyChg": -8.4,
       "householdCost": 1099
     },
     "Russia": {
@@ -112,7 +112,7 @@
     },
     "Israel": {
       "fuelUp": 16.6,
-      "currencyChg": -4.2,
+      "currencyChg": -4.7,
       "householdCost": 1610
     },
     "Iraq": {
